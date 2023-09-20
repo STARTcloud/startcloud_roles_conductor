@@ -24,9 +24,9 @@
     mode: 'a+x'
 
 -
-  name: "Printing out core_provisioner version used"
+  name: "Printing out {{ provisioner_name }} version used"
   ansible.builtin.debug:
-    msg: "This Ansible Playbook was Generated with core_provisioner v{{ provisioner_version }}"
+    msg: "This Ansible Playbook was Generated with {{ provisioner_name }} v{{ provisioner_version }}"
 
 -
   name: "Writing current variables to /vagrant/support-bundle/version.json"
