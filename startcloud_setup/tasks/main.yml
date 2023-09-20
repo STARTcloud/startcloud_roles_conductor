@@ -29,9 +29,22 @@
     msg: "This Ansible Playbook was Generated with {{ provisioner_name }} v{{ provisioner_version }}"
 
 -
-  name: "Writing current variables to /vagrant/support-bundle/version.json"
+  name: "Printing out core_provisioner version used"
+  ansible.builtin.debug:
+    msg: "This Ansible Playbook was Generated with core_provisioner v{{ core_provisioner_version }}"
+
+-
+  name: "Writing current variables to /vagrant/support-bundle/{{ provisioner_name }}-version.json"
   ansible.builtin.copy:
     content: "{{ provisioner_version }}"
-    dest: "/vagrant/support-bundle/version.json"
+    dest: "/vagrant/support-bundle/{{ provisioner_name }}-version.json"
+    force: false
+    mode: 'a+x'
+
+-
+  name: "Writing current variables to /vagrant/support-bundle/core_provisioner-version.json"
+  ansible.builtin.copy:
+    content: "{{ core_provisioner_version }}"
+    dest: "/vagrant/support-bundle/core_provisioner-version.json"
     force: false
     mode: 'a+x'
