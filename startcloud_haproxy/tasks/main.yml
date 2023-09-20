@@ -9,12 +9,10 @@
 -
   name: "Creating template and certifcate directories"
   ansible.builtin.file:
-    mode: '0644'
+    mode: '0755'
     path: "{{ item }}"
     state: directory
-    owner: haproxy
   with_items:
-    - "{{ cert_dir }}"
     - "/etc/haproxy/errors/tpl"
     - "/etc/haproxy/errors/html"
 

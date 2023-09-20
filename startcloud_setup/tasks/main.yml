@@ -35,37 +35,3 @@
     dest: "/vagrant/support-bundle/version.json"
     force: false
     mode: 'a+x'
-
--
-  name: "Extracting Networking Adapters"
-  when: networks[0] is defined
-  ansible.builtin.shell: lshw -xml -c net
-  args:
-    executable: /bin/bash
-  register: adapters
-
--
-  name: "Writing current variables to /vagrant/support-bundle/adapters.json"
-  when: networks[0] is defined
-  ansible.builtin.copy:
-    content: "{{ adapters.stdout_lines }}"
-    dest: "/vagrant/support-bundle/adapters.json"
-    force: false
-    mode: 'a+x'
-
--
-  name: "Extracting MAC address of bridged adapter"
-  when: networks[0] is defined
-  ansible.builtin.shell: set -o pipefail && lshw -xml -c net | xmllint --xpath "string(//node[@id='network']/serial|//node[@id='network:1']/serial)" -
-  args:
-    executable: /bin/bash
-  register: macaddress
-
--
-  name: "Writing current variables to /vagrant/support-bundle/bridged-macaddress.json"
-  when: networks[0] is defined
-  ansible.builtin.copy:
-    content: "{{ macaddress.stdout_lines }}"
-    dest: "/vagrant/support-bundle/bridged-macaddress.json"
-    force: false
-    mode: 'a+x'

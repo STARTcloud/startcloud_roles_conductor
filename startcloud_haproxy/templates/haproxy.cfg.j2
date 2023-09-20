@@ -85,8 +85,8 @@ frontend  STATS
         stats admin if TRUE
         http-request use-service prometheus-exporter if { path /metrics }
 
-frontend EXT-WEB:{{ startcloud_haproxy_port_forwards[1].guest}}
-        bind :::{{ startcloud_haproxy_port_forwards[1].guest}}
+frontend EXT-WEB:{{ startcloud_haproxy_port_forwards[0].guest}}
+        bind :::{{ startcloud_haproxy_port_forwards[0].guest}}
         mode http
         log global
 
@@ -100,14 +100,15 @@ frontend EXT-WEB:{{ startcloud_haproxy_port_forwards[1].guest}}
 frontend  HTTPS-IN
         ## Primary Ingress point
         {% if selfsigned_enabled %}
-        bind :::{{ startcloud_haproxy_port_forwards[0].guest}} v4v6 ssl crt  {{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pem
+        bind :::{{ startcloud_haproxy_port_forwards[1].guest}} v4v6 ssl crt  {{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pem
         {% else %}
-        bind :::{{ startcloud_haproxy_port_forwards[0].guest}} v4v6 ssl crt  {{ cert_dir }}/combined/default-signed.pem
+        bind :::{{ startcloud_haproxy_port_forwards[1].guest}} v4v6 ssl crt  {{ cert_dir }}/combined/default-signed.pem
         {% endif %}
 
         mode http
-
+        {% if haproxy_ssl_redirect %}
         http-request redirect scheme https unless { ssl_fc }
+        {% endif %}
 
         ## Dynamic Logging to Error Page
 
@@ -173,7 +174,15 @@ frontend  HTTPS-IN
         acl host_verse                hdr(host)          -i {{ domino_verse_proxy_url }}
         {% endif %}
 
+        {% if voltmx_port_forwards[0].url is defined %}
+        acl host_voltmx                 hdr(host) -i             {{ voltmx_port_forwards[0].url }}.{{ settings.hostname }}.{{ settings.domain }}
+        {% endif %}
+
+
+
         ## Application backends
+
+        use_backend                     console              if host_console
         {% if domino_vagrant_rest_api_proxy_url is defined %}
         use_backend                     restapi              if host_restapi
         {% endif %}
@@ -184,6 +193,7 @@ frontend  HTTPS-IN
 
         {% if domino_install_proxy_url is defined %}
         use_backend                     domino               if host_domino
+        default_backend                 domino
         {% endif %}
 
         {% if startcloud_quick_start_proxy_url is defined %}
@@ -210,9 +220,11 @@ frontend  HTTPS-IN
         use_backend                     verse                if host_verse
         {% endif %}
 
-        use_backend                     console              if host_console
+        {% if voltmx_port_forwards[0].url is defined %}
+        use_backend                     voltmx                if host_voltmx
+        default_backend                 voltmx
+        {% endif %}
 
-        default_backend                 downloads
 
 #---------------------------------------------------------------------
 ##### BACKENDS ####
@@ -253,9 +265,9 @@ backend domino
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_install_port_forwards[0].guest }}                        ssl verify none  check cookie app1 init-addr last,libc,none
-        {% if domino_install_port_forwards[1].guest is defined %}
+{% if domino_install_port_forwards[1].guest is defined %}
         server  domino-http             127.0.0.1:{{ domino_install_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
-        {% endif %}
+{% endif %}
 {% endif %}
 
 {% if domino_nomadweb_port_forwards[0].guest is defined %}
@@ -273,9 +285,9 @@ backend traveler
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_traveler_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-        {% if domino_traveler_port_forwards[1].guest is defined %}
+{% if domino_traveler_port_forwards[1].guest is defined %}
         server  domino-http             127.0.0.1:{{ domino_traveler_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
-        {% endif %}
+{% endif %}
 {% endif %}
 
 {% if domino_leap_port_forwards[0].guest is defined %}
@@ -284,9 +296,9 @@ backend leap
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_leap_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-        {% if domino_leap_port_forwards[1].guest is defined %}
+{% if domino_leap_port_forwards[1].guest is defined %}
         server  domino-http             127.0.0.1:{{ domino_leap_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
-        {% endif %}
+{% endif %}
 {% endif %}
 
 {% if startcloud_guacamole_port_forwards[0].guest is defined %}
@@ -303,9 +315,9 @@ backend verse
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_verse_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-        {% if domino_verse_port_forwards[1].guest is defined %}
+{% if domino_verse_port_forwards[1].guest is defined %}
         server  domino-http             127.0.0.1:{{ domino_verse_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
-        {% endif %}
+{% endif %}
 {% endif %}
 
 {% if domino_sametime_port_forwards[0].guest is defined %}
@@ -314,7 +326,23 @@ backend sametime
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_sametime_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-        {% if domino_sametime_port_forwards[1].guest is defined %}
+{% if domino_sametime_port_forwards[1].guest is defined %}
         server  domino-http             127.0.0.1:{{ domino_sametime_port_forwards[0].guest }}                        backup check cookie app1 init-addr last,libc,none
-        {% endif %}
+{% endif %}
+{% endif %}
+
+{% if voltmx_port_forwards[0].guest is defined %}
+# Voltmx
+backend voltmx
+        mode    http
+        balance roundrobin  
+        option forwardfor
+        http-request set-header X-Forwarded-Port %[dst_port]  
+        http-request add-header X-Forwarded-Proto https
+{% if voltmx_port_forwards[1].guest is defined %}
+        server  voltmx-https          127.0.0.1:{{ voltmx_port_forwards[1].guest }}           ssl verify none check cookie app1 init-addr last,libc,none
+        server  voltmx-http           127.0.0.1:{{ voltmx_port_forwards[0].guest }}           backup check cookie web1 init-addr last,libc,none
+{% else %}
+        server  voltmx-http           127.0.0.1:{{ voltmx_port_forwards[0].guest }}           check cookie web1 init-addr last,libc,none
+{% endif %}
 {% endif %}
