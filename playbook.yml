@@ -1,0 +1,22 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - role: startcloud_dependencies
+      tags: [dependencies]
+    - role: startcloud_service_user
+      tags: [service_user]
+    - role: startcloud_haproxy
+      tags: [haproxy]
+    - role: startcloud_mariadb
+      tags: [mariadb]
+    - role: startcloud_sdkman_gradle
+      tags: [sdkman_gradle]
+    - role: startcloud_sdkman_install
+      tags: [sdkman_install]
+    - role: startcloud_sdkman_java
+      tags: [sdkman_java]
+    - role: startcloud_sdkman_maven
+      tags: [sdkman_maven]
+    - role: startcloud_tomcat
+      tags: [tomcat]
