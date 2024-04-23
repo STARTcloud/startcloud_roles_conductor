@@ -12,3 +12,5 @@ packages:
   - psutils
   - python3-psutil
   - libxml2-utils
+  - acl
+
