@@ -8,6 +8,12 @@
       ansible.builtin.shell: dpkg --print-architecture
       register: deb_architecture
     -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.dependencies.a.msg }}"
+          - "{{ progress_checks.dependencies.a.val }}"
+    -
       name: "Printing DEB architecture"
       ansible.builtin.debug:
         msg: "deb_architecture.stdout: {{ deb_architecture.stdout }}"
@@ -16,6 +22,12 @@
       ansible.builtin.apt:
         cache_valid_time: 3600
         update_cache: true
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.dependencies.b.msg }}"
+          - "{{ progress_checks.dependencies.b.val }}"
     -
       name: "Upgrading all apt packages"
       ansible.builtin.apt:
@@ -26,3 +38,9 @@
       ansible.builtin.apt:
         name: "{{ packages }}"
         state: present
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.dependencies.c.msg }}"
+          - "{{ progress_checks.dependencies.c.val }}"

@@ -4,3 +4,8 @@ selfsigned_enabled: false
 cert_pass: ThisNeedstoBeSecure!
 countrycode: US
 domino_organization: DEMO
+progress_checks:
+  ssl:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }

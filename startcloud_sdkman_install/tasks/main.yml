@@ -1,5 +1,11 @@
 ---
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_install.a.msg }}"
+      - "{{ progress_checks.sdkman_install.a.val }}"
+-
   name: "Installing SDKMAN"
   ansible.builtin.include_tasks: install.yml
 
@@ -27,6 +33,13 @@
         loop_var: sdkman_profile
 
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_install.b.msg }}"
+      - "{{ progress_checks.sdkman_install.b.val }}"
+
+-
   name: "Updating alternatives"
   community.general.alternatives:
     name: "{{ item.name }}"
@@ -37,3 +50,10 @@
   when: ansible_os_family != 'Darwin'
   tags:
     - sdkman_privilege
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_install.c.msg }}"
+      - "{{ progress_checks.sdkman_install.c.val }}"

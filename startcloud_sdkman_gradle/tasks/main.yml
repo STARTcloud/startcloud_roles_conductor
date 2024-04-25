@@ -1,5 +1,12 @@
 ---
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_gradle.a.msg }}"
+      - "{{ progress_checks.sdkman_gradle.a.val }}"
+
+-
   name: "Installing gradle {{ gradle_version }}"
   ansible.builtin.shell: "{{ item }}"
   become: true
@@ -9,6 +16,13 @@
     creates: "{{ service_home_dir }}/.sdkman/candidates/gradle/current/bin/gradle"
   with_items:
     - "source {{ service_home_dir }}/.sdkman/bin/sdkman-init.sh && sdk install gradle {{ gradle_version }} && sdk default gradle {{ gradle_version }}"
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_gradle.b.msg }}"
+      - "{{ progress_checks.sdkman_gradle.b.val }}"
 
 -
   name: "Adding Gradle to /etc/profile.d/gradle.sh for {{ service_user }}"
@@ -33,3 +47,10 @@
   when: ansible_os_family != 'Darwin'
   tags:
     - sdkman_privilege
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_gradle.c.msg }}"
+      - "{{ progress_checks.sdkman_gradle.c.val }}"

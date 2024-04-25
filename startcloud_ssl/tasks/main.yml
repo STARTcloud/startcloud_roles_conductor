@@ -1,5 +1,11 @@
 ---
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.ssl.a.msg }}"
+      - "{{ progress_checks.ssl.a.val }}"
+-
   name: "Create Directories for SSLs"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -69,6 +75,13 @@
         dest: "{{ cert_dir }}/jks/default-signed.jks"
       environment:
         PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.ssl.b.msg }}"
+      - "{{ progress_checks.ssl.b.val }}"
 
 -
   name: "Generating Self Signed Certificate"
@@ -153,3 +166,10 @@
         dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-self-signed.jks"
       environment:
         PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.ssl.c.msg }}"
+      - "{{ progress_checks.ssl.c.val }}"

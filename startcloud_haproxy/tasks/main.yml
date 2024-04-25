@@ -1,10 +1,24 @@
 ---
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.haproxy.a.msg }}"
+      - "{{ progress_checks.haproxy.a.val }}"
+
+-
   name: "Installing HAProxy and KeepAlived"
   ansible.builtin.apt:
     pkg:
       - haproxy
       - keepalived
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.haproxy.b.msg }}"
+      - "{{ progress_checks.haproxy.b.val }}"
 
 -
   name: "Creating template and certifcate directories"
@@ -43,6 +57,13 @@
     - { src: 'html/502.html.j2', dest: '/etc/haproxy/errors/html/502.html', owner: 'haproxy' }
     - { src: 'html/503.html.j2', dest: '/etc/haproxy/errors/html/503.html', owner: 'haproxy' }
     - { src: 'html/504.html.j2', dest: '/etc/haproxy/errors/html/504.html', owner: 'haproxy' }
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.haproxy.c.msg }}"
+      - "{{ progress_checks.haproxy.c.val }}"
 
 -
   name: "Starting service haproxy"

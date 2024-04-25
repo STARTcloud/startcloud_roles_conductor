@@ -12,4 +12,8 @@ packages:
   - python3-psutil
   - libxml2-utils
   - acl
-
+progress_checks:
+  dependencies:
+    a: { msg: '', val: 33 }
+    b: { msg: '', val: 66 }
+    c: { msg: '', val: 100 }
