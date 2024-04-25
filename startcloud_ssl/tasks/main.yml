@@ -158,8 +158,8 @@
       name: "Creating a keystore for the self-signed certificate/private key pair"
       community.general.java_keystore:
         name: "{{ settings.hostname }}.{{ settings.domain }}"
-        certificate: "{{ lookup('file', '{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt') }}"
-        private_key: "{{ lookup('file', '{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key') }}"
+        certificate_path: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt"
+        private_key_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
         password: "{{ cert_pass }}"
         owner: "{{ service_user }}"
         mode: '0777'
