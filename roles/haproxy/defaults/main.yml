@@ -15,3 +15,9 @@ startcloud_haproxy_port_forwards:
   -
     guest: 444
     url: "stats"
+startcloud_haproxy_proxy_url: "{{ startcloud_haproxy_port_forwards[1].url }}.{{ settings.hostname }}.{{ settings.domain }}"
+progress_checks:
+  haproxy:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }
