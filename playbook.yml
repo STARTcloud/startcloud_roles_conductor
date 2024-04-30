@@ -7,7 +7,7 @@
   pre_tasks:
     - name: Wait for system to become reachable
       ansible.builtin.wait_for_connection:
-        delay: 60
+        delay: 30
         timeout: 300
       tags: [dependencies]
 - hosts: all
