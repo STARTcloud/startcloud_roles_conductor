@@ -12,3 +12,8 @@ sdkman_update_alternatives:
   - candidate: java
     name: javadoc
     link: /usr/bin/javadoc
+progress_checks:
+  sdkman_java:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }

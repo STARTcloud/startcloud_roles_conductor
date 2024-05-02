@@ -1,0 +1,90 @@
+---
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.postgresql.a.msg }}"
+      - "{{ progress_checks.postgresql.a.val }}"
+-
+  name: "Install packages"
+  ansible.builtin.apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - libpq-dev
+      - python3-psycopg2
+      - acl         # Fixes error with become_user: postgres
+      - python3-pip
+    state: present
+    update_cache: yes
+  register: result
+  retries: 100
+  delay: 5
+  until: result is success or ('Unable to acquire the dpkg frontend lock' not in result.msg and '/var/lib/dpkg/lock-frontend' not in result.msg)
+-
+  name: "Find out if PostgreSQL is initialized"
+  ansible.builtin.stat:
+    path: "{{ postgresql_data_dir }}/pg_hba.conf"
+  register: postgres_data
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.postgresql.b.msg }}"
+      - "{{ progress_checks.postgresql.b.val }}"
+-
+  name: "Initialize PostgreSQL"
+  ansible.builtin.shell: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
+  become: true
+  become_user: postgres
+  when: not postgres_data.stat.exists
+-
+  name: Set listen_addresses
+  ansible.builtin.lineinfile:
+    path: "{{ postgresql_data_dir }}/postgresql.conf"
+    regexp: listen_addresses =
+    line: listen_addresses = '*'
+-
+  name: "Start and enable services"
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+-
+  name: "Create db user"
+  community.postgresql.postgresql_user:
+    state: present
+    name: "{{ postgresql_user }}"
+    password: "{{ postgresql_pass }}"
+  become: true
+  become_user: postgres
+  no_log: true
+-
+  name: Grant user access from remote anywhere
+  community.postgresql.postgresql_pg_hba:
+    dest: "{{ postgresql_data_dir }}/pg_hba.conf"
+    keep_comments_at_rules: true
+    comment: "Added by provisiong script"
+    rules_behavior: combine
+    rules:
+    -
+      users: "{{ postgresql_user }}"
+      databases: all
+      method: md5
+      address: all
+      contype: host
+    -
+      databases: all
+      method: trust
+      contype: local
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.postgresql.c.msg }}"
+      - "{{ progress_checks.postgresql.c.val }}"
+-
+  name: "Restarting PostgreSQL"
+  ansible.builtin.systemd:
+    name: postgresql
+    state: restarted

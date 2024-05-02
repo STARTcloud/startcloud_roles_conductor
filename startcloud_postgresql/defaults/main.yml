@@ -1,0 +1,11 @@
+---
+postgresql_pass: SomePostgreSQLPassword
+postgresql_user: root
+postgresql_version: "15"
+postgresql_bin_path: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+postgresql_data_dir: "/etc/postgresql/{{ postgresql_version }}/main"
+progress_checks:
+  postgresql:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }

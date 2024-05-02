@@ -22,6 +22,10 @@
       ansible.builtin.apt:
         cache_valid_time: 3600
         update_cache: true
+      register: result
+      retries: 100
+      delay: 5
+      until: result is success or ('Unable to acquire the dpkg frontend lock' not in result.msg and '/var/lib/dpkg/lock-frontend' not in result.msg)
     -
       name: "Log playbook progress"
       ansible.builtin.debug:
@@ -31,8 +35,12 @@
     -
       name: "Upgrading all apt packages"
       ansible.builtin.apt:
-        upgrade: dist
+        #upgrade: dist
         update_cache: true
+      register: result2
+      retries: 100
+      delay: 5
+      until: result2 is success or ('Unable to acquire the dpkg frontend lock' not in result2.msg and '/var/lib/dpkg/lock-frontend' not in result2.msg)
     -
       name: "Adding Additional Dependencies {{ packages }}"
       ansible.builtin.apt:

@@ -7,3 +7,8 @@ startcloud_mariadb_port_forwards:
     guest: 3306
     url: "mariadb"
 startcloud_mariadb_proxy_url: "{{ startcloud_mariadb_port_forwards[0].url }}.{{ settings.hostname }}.{{ settings.domain }}"
+progress_checks:
+  mariadb:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }
