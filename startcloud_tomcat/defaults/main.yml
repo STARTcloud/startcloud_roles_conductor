@@ -18,3 +18,8 @@ startcloud_tomcat_port_forwards:
     guest: 8843
     url: "tomcat"
 startcloud_tomcat_proxy_url: "{{ startcloud_tomcat_port_forwards[0].url }}.{{ settings.hostname }}.{{ settings.domain }}"
+progress_checks:
+  tomcat:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }

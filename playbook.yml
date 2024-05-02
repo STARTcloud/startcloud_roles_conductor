@@ -5,11 +5,17 @@
   become: true
   gather_facts: false
   pre_tasks:
+    - name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "Provision started"
+          - "1"
+      tags: [always]
     - name: Wait for system to become reachable
       ansible.builtin.wait_for_connection:
         delay: 30
         timeout: 300
-      tags: [dependencies]
+      tags: [always]
 - hosts: all
   become: true
   roles:
@@ -25,6 +31,8 @@
       tags: [startcloud_ssl]
     - role: startcloud_haproxy
       tags: [haproxy]
+    - role: startcloud_postgres
+      tags: [postgres]
     - role: startcloud_mariadb
       tags: [mariadb]
     - role: startcloud_sdkman_gradle

@@ -1,5 +1,11 @@
 ---
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.mariadb.a.msg }}"
+      - "{{ progress_checks.mariadb.a.val }}"
+-
   name: "Installing MariaDB"
   ansible.builtin.apt:
     name:
@@ -19,6 +25,13 @@
     user: "{{ mariadb_admin_user }}"
     password: "{{ mariadb_admin_pass }}"
     host: localhost
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.mariadb.b.msg }}"
+      - "{{ progress_checks.mariadb.b.val }}"
 
 -
   name: "Securing MariaDB"
@@ -46,6 +59,13 @@
     line: "bind-address  = 0.0.0.0"
   with_items:
     - { dir: "/etc/mysql/mariadb.conf.d/50-server.cnf" }
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.mariadb.c.msg }}"
+      - "{{ progress_checks.mariadb.c.val }}"
 
 -
   name: "Restarting MariaDB"

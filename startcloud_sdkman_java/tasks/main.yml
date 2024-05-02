@@ -1,6 +1,12 @@
 ---
   ## Do not quote the shell command below without reworking the command
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_java.a.msg }}"
+      - "{{ progress_checks.sdkman_java.a.val }}"
+-
   name: "Extracting Java SDK version from SDKMAN: {{ java_version }}"
   ansible.builtin.shell: |
     set -o pipefail
@@ -22,6 +28,13 @@
     executable: "/bin/bash"
   register: selected_java_version
   when: "java_version != 'LATEST'"
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_java.b.msg }}"
+      - "{{ progress_checks.sdkman_java.b.val }}"
 
 -
   name: "Installing Java via SDKMAN: {{ java_version }}"
@@ -50,6 +63,13 @@
     line: 'PATH=$PATH:{{ service_home_dir }}/.sdkman/candidates/java/current/bin'
   with_items:
     - { user: "{{ service_user }}", dir: "/etc/profile.d/java.sh" }
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.sdkman_java.c.msg }}"
+      - "{{ progress_checks.sdkman_java.c.val }}"
 
 -
   name: "Updating Java Alternatives"

@@ -1,5 +1,11 @@
 ---
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.tomcat.a.msg }}"
+      - "{{ progress_checks.tomcat.a.val }}"
+-
   name: "Creating Tomcat directories"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -55,6 +61,13 @@
     system: true
 
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.tomcat.b.msg }}"
+      - "{{ progress_checks.tomcat.b.val }}"
+
+-
   name: "Installing Tomcat {{ tomcat_version }}"
   ansible.builtin.apt:
     name:
@@ -98,6 +111,13 @@
   with_items:
     - "/etc/tomcat{{ tomcat_version }}/server.xml"
   notify: "Restart tomcat"
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.tomcat.c.msg }}"
+      - "{{ progress_checks.tomcat.c.val }}"
 
 -
   name: "Starting and Enabling Tomcat {{ tomcat_version }}"
