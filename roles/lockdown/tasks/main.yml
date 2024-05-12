@@ -7,15 +7,15 @@
     enabled: false
   loop: "{{ lockdown }}"
 
-# -
-#   name: "Disabling Default Startcloud SSH Key"
-#   lineinfile:
-#     path: /home/startcloud/.ssh/authorized_keys
-#     state: absent
-#     regexp: '^%vagrantup'
+#-
+#  name: "Disabling Default Startcloud SSH Key"
+#  ansible.builtin.lineinfile:
+#    path: /home/startcloud/.ssh/authorized_keys
+#    state: absent
+#    regexp: '^%vagrantup'
 #
-# -
-#   name: Place New SSH Key
-#   template:
-#     src: id_rsa.j2.pub
-#     dest: '/home/startcloud/.ssh/authorized_keys'
+#-
+#  name: "Place New SSH Key"
+#  ansible.builtin.template:
+#    src: id_rsa.j2.pub
+#    dest: '/home/startcloud/.ssh/authorized_keys'
