@@ -1,6 +1,6 @@
 namespace: startcloud
 name: startcloud_roles
-version: 1.0.0
+version: 1.0.1
 tags: []
 readme: "README.md"
 repository: https://github.com/STARTcloud/startcloud_roles
@@ -12,11 +12,6 @@ authors:
   - name: MarkProminic
 license: 
   - GPL-2.0-or-later
-min_ansible_version: 2.10
-platforms:
-  - name: Debian
-    versions:
-      - 12
 galaxy_tags:
-  - hcl
+  - startcloud
   - roles
