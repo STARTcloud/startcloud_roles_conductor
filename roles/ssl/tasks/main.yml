@@ -75,49 +75,101 @@
   when: selfsigned_enabled
   block:
     -
-      name: "Generating self signed SSL Key"
+      name: "Creating private key for Certifcate Authority"
       community.crypto.openssl_privatekey:
-        path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+        path: "{{ cert_dir }}/ca/ca-certificate.key"
+        passphrase: "{{ cert_pass }}"
+        mode: '0777'
+
+    -
+      name: "Creating certificate signing request (CSR) for Certifcate Authority certificate"
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+        privatekey_passphrase: "{{ cert_pass }}"
+        common_name: "{{ settings.domain }}"
+        country_name: "{{ countrycode }}"
+        organization_name: "{{ domino_organization }}"
+        use_common_name_for_san: false  # Set to false if you don't want to use CN as a SAN
+        basic_constraints:
+          - 'CA:TRUE'
+        basic_constraints_critical: true
+        key_usage:
+          - keyCertSign
+        key_usage_critical: true
+        owner: "{{ service_user }}"
+        mode: '0777'
+      register: ca_csr
+
+    -
+      name: "Creating self-signed CA certificate from CA CSR"
+      community.crypto.x509_certificate:
+        path: "{{ cert_dir }}/ca/ca-certificate.pem"
+        csr_content: "{{ ca_csr.csr }}"
+        privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+        privatekey_passphrase: "{{ cert_pass }}"
+        provider: selfsigned
         owner: "{{ service_user }}"
         mode: '0777'
 
     -
-      name: "Generating self signed CSR Request"
-      community.crypto.openssl_csr:
-        path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
-        privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
-        country_name: "{{ countrycode }}"
-        organization_name: "{{ domino_organization }}"
-        common_name: "{{ settings.hostname }}.{{ settings.domain }}"
-        subject_alt_name:
-          - "DNS:{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:nomadweb.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:domino.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:traveler.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:verse.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:console.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:logging.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:welcome.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:proxy.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:downloads.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:sametime.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:leap.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:restapi.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:guacamole.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:voltmx.{{ settings.hostname }}.{{ settings.domain }}"
-          - "DNS:www.{{ settings.hostname }}.{{ settings.domain }}"
+      name: "Copying root CA certificate to trusted certificates directory"
+      ansible.builtin.copy:
+        src: "{{ cert_dir }}/ca/ca-certificate.pem"
+        dest: "/usr/local/share/ca-certificates/ca-certificate.pem"
+        owner: root
+        group: root
+        mode: '0644'
+
+    -
+      name: Update system's certificate store
+      ansible.builtin.command: update-ca-certificates
+
+    -
+      name: "Generating Servers self signed SSL Key"
+      community.crypto.openssl_privatekey:
+        path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
         owner: "{{ service_user }}"
+        type: rsa
+        bits: 4096
         mode: '0777'
+
+    -
+      name: "Setting DNS entries as a fact"
+      ansible.builtin.set_fact:
+        dns_entries: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
+      loop:
+        - nomadweb
+        - domino
+        - traveler
+        - verse
+        - console
+        - logging
+        - welcome
+        - proxy
+        - downloads
+        - sametime
+        - leap
+        - restapi
+        - guacamole
+        - voltmx
+        - www
 
     -
       name: "Generating self signed Certificate"
       community.crypto.x509_certificate:
-        provider: selfsigned
         path: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt"
         privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
         csr_path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
+        country_name: "{{ countrycode }}"
+        organization_name: "{{ domino_organization }}"
+        common_name: "{{ settings.hostname }}.{{ settings.domain }}"                
+        provider: ownca
+        ownca_path: "{{ cert_dir }}/ca/ca-certificate.pem"
+        ownca_privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+        subject_alt_name: "{{ item }}"
         owner: "{{ service_user }}"
         mode: '0777'
+      loop: "{{ dns_entries }}"
 
     -
       name: "Generating self signed PKCS12 file"
