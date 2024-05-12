@@ -1,10 +1,17 @@
 collection:
+  namespace: startcloud
   name: startcloud_roles
   version: 1.0.0
+  tags: []
+  repository: https://github.com/STARTcloud/startcloud_roles
+  documentation: https://github.com/STARTcloud/startcloud_roles
+  homepage: https://github.com/STARTcloud/startcloud_roles
+  issues: https://github.com/STARTcloud/startcloud_roles/issues
   description: "A collection of roles for the STARTcloud Environment"
   authors:
     - name: MarkProminic
-  license: MIT
+  license: 
+    - GPL-2.0-or-later
   min_ansible_version: 2.10
   platforms:
     - name: Debian
