@@ -1,0 +1,15 @@
+collection:
+  name: startcloud_roles
+  version: 1.0.0
+  description: "A collection of roles for the STARTcloud Environment"
+  authors:
+    - name: MarkProminic
+  license: MIT
+  min_ansible_version: 2.10
+  platforms:
+    - name: Debian
+      versions:
+        - 12
+  galaxy_tags:
+    - hcl
+    - roles
