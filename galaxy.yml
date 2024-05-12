@@ -3,6 +3,7 @@ collection:
   name: startcloud_roles
   version: 1.0.0
   tags: []
+  readme: "README.md"
   repository: https://github.com/STARTcloud/startcloud_roles
   documentation: https://github.com/STARTcloud/startcloud_roles
   homepage: https://github.com/STARTcloud/startcloud_roles
