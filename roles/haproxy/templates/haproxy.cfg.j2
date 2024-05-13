@@ -107,8 +107,7 @@ frontend  HTTPS-IN
 
         mode http
         {% if haproxy_ssl_redirect %}
-        http-request redirect scheme https unless { ssl_fc }
-        {% endif %}
+        http-request redirect scheme https unless { ssl_fc }{% endif %}
 
         ## Dynamic Logging to Error Page
 
@@ -121,10 +120,10 @@ frontend  HTTPS-IN
 
 
         #BEGIN CORS
-        http-response set-header Access-Control-Allow-Origin "*"
-        http-response set-header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, JSNLog-RequestId, activityId, applicationId, applicationUserId, channelId, senderId, sessionId"
-        http-response set-header Access-Control-Max-Age 3628800
-        http-response set-header Access-Control-Allow-Methods "*"
+        #http-response set-header Access-Control-Allow-Origin "*"
+        #http-response set-header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, JSNLog-RequestId, activityId, applicationId, applicationUserId, channelId, senderId, sessionId"
+        #http-response set-header Access-Control-Max-Age 3628800
+        #http-response set-header Access-Control-Allow-Methods "*"
         # END CORS
 
 
@@ -132,99 +131,50 @@ frontend  HTTPS-IN
         ## Source ACL Definitions
         #acl network_allowed             src          10.0.2.0/16 192.168.0.0/16 172.16.0.0/16
 
-
         ## Host ACL Definitions
         acl host_demo                 hdr(host)          -i {{ settings.hostname }}.{{ settings.domain }}
-
         acl host_console              hdr(host)          -i console.{{ settings.hostname }}.{{ settings.domain }}
-
-        {% if domino_vagrant_rest_api_proxy_url is defined %}
-        acl host_restapi              hdr(host)          -i {{ domino_vagrant_rest_api_proxy_url }}
-        {% endif %}
-
-        {% if domino_nomadweb_proxy_url is defined %}
-        acl host_nomadweb             hdr(host)          -i {{  domino_nomadweb_proxy_url }}
-        {% endif %}
-
-        {% if domino_install_proxy_url is defined %}
-        acl host_domino               hdr(host)          -i {{ domino_install_proxy_url }}
-        {% endif %}
-
-        {% if startcloud_quick_start_proxy_url is defined %}
-        acl host_downloads            hdr(host)          -i {{ startcloud_quick_start_proxy_url }}
-        {% endif %}
-
-        {% if domino_leap_proxy_url is defined %}
-        acl host_leap                 hdr(host)          -i {{ domino_leap_proxy_url }}
-        {% endif %}
-
-        {% if domino_traveler_proxy_url is defined %}
-        acl host_traveler             hdr(host)          -i {{ domino_traveler_proxy_url }}
-        {% endif %}
-
-        {% if domino_sametime_proxy_url is defined %}
-        acl host_sametime            hdr(host)          -i {{ domino_sametime_proxy_url }}
-        {% endif %}
-
-        {% if startcloud_guacamole_proxy_url is defined %}
-        acl host_guacamole            hdr(host)          -i {{ startcloud_guacamole_proxy_url }}
-        {% endif %}
-
-        {% if domino_verse_proxy_url is defined %}
-        acl host_verse                hdr(host)          -i {{ domino_verse_proxy_url }}
-        {% endif %}
-
-        {% if voltmx_port_forwards[0].url is defined %}
-        acl host_voltmx                 hdr(host) -i             {{ voltmx_port_forwards[0].url }}.{{ settings.hostname }}.{{ settings.domain }}
-        {% endif %}
-
-
+        {% if domino_vagrant_rest_api_proxy_url is defined %}acl host_restapi              hdr(host)          -i {{ domino_vagrant_rest_api_proxy_url }}{% endif %}
+        {% if domino_nomadweb_proxy_url is defined %}acl host_nomadweb             hdr(host)          -i {{  domino_nomadweb_proxy_url }}{% endif %}
+        {% if domino_install_proxy_url is defined %}acl host_domino               hdr(host)          -i {{ domino_install_proxy_url }}{% endif %}
+        {% if startcloud_quick_start_proxy_url is defined %}acl host_downloads            hdr(host)          -i {{ startcloud_quick_start_proxy_url }}{% endif %}
+        {% if domino_leap_proxy_url is defined %}acl host_leap                 hdr(host)          -i {{ domino_leap_proxy_url }}{% endif %}
+        {% if domino_traveler_proxy_url is defined %}acl host_traveler             hdr(host)          -i {{ domino_traveler_proxy_url }}{% endif %}
+        {% if domino_sametime_proxy_url is defined %}acl host_sametime            hdr(host)          -i {{ domino_sametime_proxy_url }}{% endif %}
+        {% if startcloud_guacamole_proxy_url is defined %}acl host_guacamole            hdr(host)          -i {{ startcloud_guacamole_proxy_url }}{% endif %}
+        {% if domino_verse_proxy_url is defined %}acl host_verse                hdr(host)          -i {{ domino_verse_proxy_url }}{% endif %}
+        {% if voltmx_port_forwards[0].url is defined %}acl host_voltmx                 hdr(host) -i             {{ voltmx_port_forwards[0].url }}.{{ settings.hostname }}.{{ settings.domain }}{% endif %}
 
         ## Application backends
-
         use_backend                     console              if host_console
-        {% if domino_vagrant_rest_api_proxy_url is defined %}
-        use_backend                     restapi              if host_restapi
-        {% endif %}
-
-        {% if domino_nomadweb_proxy_url is defined %}
-        use_backend                     nomadweb             if host_nomadweb
-        {% endif %}
+        {% if domino_vagrant_rest_api_proxy_url is defined %}use_backend                     restapi              if host_restapi{% endif %}
+        {% if domino_nomadweb_proxy_url is defined %}use_backend                     nomadweb             if host_nomadweb{% endif %}
 
         {% if domino_install_proxy_url is defined %}
         use_backend                     domino               if host_domino
         default_backend                 domino
         {% endif %}
 
-        {% if startcloud_quick_start_proxy_url is defined %}
-        use_backend                     downloads            if host_downloads || host_demo
-        {% endif %}
+        {% if startcloud_quick_start_proxy_url is defined %}use_backend                     downloads            if host_downloads || host_demo{% endif %}
 
-        {% if domino_leap_proxy_url is defined %}
-        use_backend                     leap                 if host_leap
-        {% endif %}
+        {% if domino_leap_proxy_url is defined %}use_backend                     leap                 if host_leap{% endif %}
 
-        {% if domino_traveler_proxy_url is defined %}
-        use_backend                     traveler             if host_traveler
-        {% endif %}
+        {% if domino_traveler_proxy_url is defined %}use_backend                     traveler             if host_traveler{% endif %}
 
-        {% if domino_sametime_proxy_url is defined %}
-        use_backend                     sametime            if host_sametime
-        {% endif %}
+        {% if domino_sametime_proxy_url is defined %}use_backend                     sametime            if host_sametime{% endif %}
 
-        {% if startcloud_guacamole_proxy_url is defined %}
-        use_backend                     guacamole            if host_guacamole
-        {% endif %}
+        {% if startcloud_guacamole_proxy_url is defined %}use_backend                     guacamole            if host_guacamole{% endif %}
 
-        {% if domino_verse_proxy_url is defined %}
-        use_backend                     verse                if host_verse
-        {% endif %}
+        {% if domino_verse_proxy_url is defined %}use_backend                     verse                if host_verse{% endif %}
 
-        {% if voltmx_port_forwards[0].url is defined %}
-        use_backend                     voltmx                if host_voltmx
-        default_backend                 voltmx
-        {% endif %}
+        {% if voltmx_port_forwards[0].url is defined %}use_backend                     voltmx                if host_voltmx
+        default_backend                 voltmx{% endif %}
 
+        {% if domino_verse_proxy_url is defined %}use_backend                     verse                if host_verse{% endif %}
+
+        use_backend                     console              if host_console
+
+        default_backend                 downloads
 
 #---------------------------------------------------------------------
 ##### BACKENDS ####
@@ -265,8 +215,7 @@ backend domino
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_install_port_forwards[0].guest }}                        ssl verify none  check cookie app1 init-addr last,libc,none
-{% if domino_install_port_forwards[1].guest is defined %}
-        server  domino-http             127.0.0.1:{{ domino_install_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
+{% if domino_install_port_forwards[1].guest is defined %}server  domino-http             127.0.0.1:{{ domino_install_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
 {% endif %}
 {% endif %}
 
@@ -285,8 +234,7 @@ backend traveler
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_traveler_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-{% if domino_traveler_port_forwards[1].guest is defined %}
-        server  domino-http             127.0.0.1:{{ domino_traveler_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
+{% if domino_traveler_port_forwards[1].guest is defined %}server  domino-http             127.0.0.1:{{ domino_traveler_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
 {% endif %}
 {% endif %}
 
@@ -296,8 +244,7 @@ backend leap
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_leap_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-{% if domino_leap_port_forwards[1].guest is defined %}
-        server  domino-http             127.0.0.1:{{ domino_leap_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
+{% if domino_leap_port_forwards[1].guest is defined %}server  domino-http             127.0.0.1:{{ domino_leap_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
 {% endif %}
 {% endif %}
 
@@ -315,8 +262,7 @@ backend verse
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_verse_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-{% if domino_verse_port_forwards[1].guest is defined %}
-        server  domino-http             127.0.0.1:{{ domino_verse_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
+{% if domino_verse_port_forwards[1].guest is defined %}server  domino-http             127.0.0.1:{{ domino_verse_port_forwards[1].guest }}                        backup check cookie app1 init-addr last,libc,none
 {% endif %}
 {% endif %}
 
@@ -326,8 +272,7 @@ backend sametime
         mode    http
         balance leastconn
         server  domino-https            127.0.0.1:{{ domino_sametime_port_forwards[0].guest }}                       ssl verify none  check cookie app1 init-addr last,libc,none
-{% if domino_sametime_port_forwards[1].guest is defined %}
-        server  domino-http             127.0.0.1:{{ domino_sametime_port_forwards[0].guest }}                        backup check cookie app1 init-addr last,libc,none
+{% if domino_sametime_port_forwards[1].guest is defined %}server  domino-http             127.0.0.1:{{ domino_sametime_port_forwards[0].guest }}                        backup check cookie app1 init-addr last,libc,none
 {% endif %}
 {% endif %}
 
@@ -339,8 +284,7 @@ backend voltmx
         option forwardfor
         http-request set-header X-Forwarded-Port %[dst_port]  
         http-request add-header X-Forwarded-Proto https
-{% if voltmx_port_forwards[1].guest is defined %}
-        server  voltmx-https          127.0.0.1:{{ voltmx_port_forwards[1].guest }}           ssl verify none check cookie app1 init-addr last,libc,none
+{% if voltmx_port_forwards[1].guest is defined %}server  voltmx-https          127.0.0.1:{{ voltmx_port_forwards[1].guest }}           ssl verify none check cookie app1 init-addr last,libc,none
         server  voltmx-http           127.0.0.1:{{ voltmx_port_forwards[0].guest }}           backup check cookie web1 init-addr last,libc,none
 {% else %}
         server  voltmx-http           127.0.0.1:{{ voltmx_port_forwards[0].guest }}           check cookie web1 init-addr last,libc,none
