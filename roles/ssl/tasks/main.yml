@@ -129,7 +129,6 @@
         path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
         owner: "{{ service_user }}"
         type: "RSA"
-        bits: 4096
         mode: '0777'
 
     -
