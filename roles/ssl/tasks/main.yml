@@ -173,6 +173,7 @@
         provider: ownca
         ownca_path: "{{ cert_dir }}/ca/ca-certificate.pem"
         ownca_privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+        ownca_privatekey_passphrase: "{{ cert_pass }}"
         owner: "{{ service_user }}"
         mode: '0777'
 #################################################################################
