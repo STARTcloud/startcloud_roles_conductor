@@ -79,7 +79,7 @@
       community.crypto.openssl_privatekey:
         path: "{{ cert_dir }}/ca/ca-certificate.key"
         passphrase: "{{ cert_pass }}"
-        cipher: 'aes256'
+        cipher: 'auto'
         mode: '0777'
 
     -
