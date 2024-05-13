@@ -34,4 +34,4 @@ dependencies: []
   # if you add dependencies to this list.
 
 collections:
-  - startcloud
+  - startcloud.startcloud_roles
