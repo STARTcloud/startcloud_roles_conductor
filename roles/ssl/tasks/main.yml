@@ -130,7 +130,7 @@
         owner: "{{ service_user }}"
         type: "RSA"
         mode: '0777'
-
+#################################################################################
     -
       name: "Setting DNS entries as a fact"
       ansible.builtin.set_fact:
@@ -152,23 +152,30 @@
         - voltmx
         - www
 
+    - name: "Generating an OpenSSL CSR with subjectAltName extension with dynamic list"
+      community.crypto.openssl_csr:
+        path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
+        privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+        subject_alt_name: "{{ dns_entries | list }}"
+        country_name: "{{ countrycode }}"
+        organization_name: "{{ domino_organization }}"
+        common_name: "{{ settings.hostname }}.{{ settings.domain }}"
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+#################################################################################
     -
       name: "Generating self signed Certificate"
       community.crypto.x509_certificate:
         path: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt"
         privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
         csr_path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
-        country_name: "{{ countrycode }}"
-        organization_name: "{{ domino_organization }}"
-        common_name: "{{ settings.hostname }}.{{ settings.domain }}"                
         provider: ownca
         ownca_path: "{{ cert_dir }}/ca/ca-certificate.pem"
         ownca_privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
-        subject_alt_name: "{{ item }}"
         owner: "{{ service_user }}"
         mode: '0777'
-      loop: "{{ dns_entries }}"
-
+#################################################################################
     -
       name: "Generating self signed PKCS12 file"
       community.crypto.openssl_pkcs12:
