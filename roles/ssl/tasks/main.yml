@@ -97,8 +97,6 @@
         key_usage:
           - keyCertSign
         key_usage_critical: true
-        owner: "{{ service_user }}"
-        mode: '0777'
       register: ca_csr
 
     -
