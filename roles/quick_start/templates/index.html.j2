@@ -73,6 +73,10 @@
             <p>&emsp;b) Open the <a href="https://console.{{ settings.hostname }}.{{ settings.domain }}/system/terminal" target="_blank">Web Console</a> and login with the linux user credentials below</p>
             <p>&emsp;then</p>
             <p>&emsp;To open the Domino console run <a href="#" onclick="CopyToClipboard('dom-console');return false;"><code id="dom-console">sudo domino console</code></a> </p>
+            {% if selfsigned_enabled %}
+            <p>You used the Self Signed Option, please add this Root CA to your Local OS to get rid of SSL warnings. This will vary based on your Local OS</p>
+            <p><a href="https://{{ startcloud_quick_start_proxy_url }}/ca-certificate.pem" target="_blank">Root CA Certificate</a></p>
+            {% endif %}
         </div>
         <hr>
         <div class="section">
