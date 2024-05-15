@@ -67,8 +67,8 @@ STARTcloud Roles enhances the provisioning process by automating the configurati
 ```
 hosts: all
 roles: 
-  - startcloud.roles.ssl_setup
-  - startcloud.roles.service_configuration
+  - startcloud.startcloud_roles.ssl
+  - startcloud.startcloud_roles.service_user
 ```
 
 
