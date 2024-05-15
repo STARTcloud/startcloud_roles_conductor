@@ -149,28 +149,30 @@ frontend  HTTPS-IN
 
         #### ACL's  ####
         ## Source ACL Definitions
-        {# acl network_allowed             src          10.0.2.0/16 192.168.0.0/16 172.16.0.0/16 #}
+        {# acl network_allowed             src            10.0.2.0/16 192.168.0.0/16 172.16.0.0/16 #}
 
         ## Host ACL Definitions
-        acl host_demo                 hdr(host)          -i {{ settings.hostname }}.{{ settings.domain }}
-        acl host_console              hdr(host)          -i console.{{ settings.hostname }}.{{ settings.domain }}
+        acl host_demo                 hdr(host)            -i {{ settings.hostname }}.{{ settings.domain }}
+        acl host_console              hdr(host)            -i console.{{ settings.hostname }}.{{ settings.domain }}
+
 {% if domino_vagrant_rest_api_proxy_url is defined %}
-        acl host_restapi              hdr(host)          -i {{ domino_vagrant_rest_api_proxy_url }}
+        acl host_restapi              hdr(host)            -i {{ domino_vagrant_rest_api_proxy_url }}
 {% endif %}
 {% if domino_nomadweb_proxy_url is defined %}
-        acl host_nomadweb             hdr(host)          -i {{  domino_nomadweb_proxy_url }}
+        acl host_nomadweb             hdr(host)            -i {{  domino_nomadweb_proxy_url }}
+        acl is_options                req.method           -i OPTIONS
 {% endif %}
 {% if domino_install_proxy_url is defined %}
-        acl host_domino               hdr(host)          -i {{ domino_install_proxy_url }}
+        acl host_domino               hdr(host)            -i {{ domino_install_proxy_url }}
 {% endif %}
 {% if startcloud_quick_start_proxy_url is defined %}
-        acl host_downloads            hdr(host)          -i {{ startcloud_quick_start_proxy_url }}
+        acl host_downloads            hdr(host)            -i {{ startcloud_quick_start_proxy_url }}
 {% endif %}
 {% if domino_leap_proxy_url is defined %}
-        acl host_leap                 hdr(host)          -i {{ domino_leap_proxy_url }}
+        acl host_leap                 hdr(host)            -i {{ domino_leap_proxy_url }}
 {% endif %}
 {% if domino_traveler_proxy_url is defined %}
-        acl host_traveler             hdr(host)          -i {{ domino_traveler_proxy_url }}
+        acl host_traveler             hdr(host)            -i {{ domino_traveler_proxy_url }}
 {% endif %}
 {% if domino_sametime_proxy_url is defined %}
         acl host_sametime             hdr(host)            -i {{ domino_sametime_proxy_url }}
@@ -191,7 +193,8 @@ frontend  HTTPS-IN
         use_backend                   restapi              if host_restapi
 {% endif %}
 {% if domino_nomadweb_proxy_url is defined %}
-        use_backend                   nomadweb             if host_nomadweb
+        use_backend                   nomadweb             if host_nomadweb        
+        use_backend                   cors_backend         if host_nomadweb is_options
 {% endif %}
 {% if domino_install_proxy_url is defined %}
         use_backend                   domino               if host_domino
