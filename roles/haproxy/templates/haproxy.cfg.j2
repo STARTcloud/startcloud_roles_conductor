@@ -149,7 +149,8 @@ frontend  HTTPS-IN
 
         #### ACL's  ####
         ## Source ACL Definitions
-        {# acl network_allowed             src            10.0.2.0/16 192.168.0.0/16 172.16.0.0/16 #}
+        {#acl network_allowed           src                  10.0.2.0/16 192.168.0.0/16 172.16.0.0/16 #}
+        acl host_direct_ip            req.url              ^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?)/?
 
         ## Host ACL Definitions
         acl host_demo                 hdr(host)            -i {{ settings.hostname }}.{{ settings.domain }}
@@ -197,7 +198,7 @@ frontend  HTTPS-IN
         use_backend                   cors_backend         if host_nomadweb is_options
 {% endif %}
 {% if domino_install_proxy_url is defined %}
-        use_backend                   domino               if host_domino
+        use_backend                   domino               if host_domino || host_demo 
 {% endif %}
 {% if domino_leap_proxy_url is defined %}
         use_backend                   leap                 if host_leap
@@ -218,7 +219,7 @@ frontend  HTTPS-IN
         use_backend                   voltmx               if host_voltmx
 {% endif %}
 {% if startcloud_quick_start_proxy_url is defined %}
-        use_backend                   downloads            if host_downloads || host_demo
+        use_backend                   downloads            if host_downloads || host_direct_ip
 {% endif %}
 {% if haproxy_default_backend is defined %}
         default_backend               {{ haproxy_default_backend }}
