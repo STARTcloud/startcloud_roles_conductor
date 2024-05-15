@@ -160,7 +160,7 @@ frontend  HTTPS-IN
 {% endif %}
 {% if domino_nomadweb_proxy_url is defined %}
         acl host_nomadweb             hdr(host)            -i {{  domino_nomadweb_proxy_url }}
-        acl is_options                req.method           -i OPTIONS
+        acl is_options                method               OPTIONS
 {% endif %}
 {% if domino_install_proxy_url is defined %}
         acl host_domino               hdr(host)            -i {{ domino_install_proxy_url }}
