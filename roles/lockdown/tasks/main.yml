@@ -7,15 +7,30 @@
     enabled: false
   loop: "{{ lockdown }}"
 
-#-
-#  name: "Disabling Default Startcloud SSH Key"
-#  ansible.builtin.lineinfile:
-#    path: /home/startcloud/.ssh/authorized_keys
-#    state: absent
-#    regexp: '^%vagrantup'
-#
-#-
-#  name: "Place New SSH Key"
-#  ansible.builtin.template:
-#    src: id_rsa.j2.pub
-#    dest: '/home/startcloud/.ssh/authorized_keys'
+- 
+  name: "Changing startcloud Password"
+  user:
+    name: "startcloud"
+    state: present
+    password: "{{ settings.vagrant_user_pass | password_hash('sha512') }}"
+
+- 
+  name: "Generating an OpenSSH keypair with the default values"
+  community.crypto.openssh_keypair:
+    owner: startcloud
+    group: startcloud
+    path: /home/startcloud/.ssh/id_ssh_rsa
+
+- 
+  name: "Appending SSH public key to authorized_keys"
+  ansible.builtin.lineinfile:
+    path: /home/startcloud/.ssh/authorized_keys
+    insertafter: EOF
+    line: "{{ lookup('file', '/home/startcloud/.ssh/id_ssh_rsa.pub') }}"
+
+-
+  name: "Disabling Default Startcloud SSH Key"
+  ansible.builtin.lineinfile:
+    path: /home/startcloud/.ssh/authorized_keys
+    state: absent
+    regexp: '^%vagrantup'
