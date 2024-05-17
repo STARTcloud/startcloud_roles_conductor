@@ -21,16 +21,22 @@
     group: startcloud
     path: /home/startcloud/.ssh/id_ssh_rsa
 
-- 
-  name: "Appending SSH public key to authorized_keys"
-  ansible.builtin.lineinfile:
-    path: /home/startcloud/.ssh/authorized_keys
-    insertafter: EOF
-    line: "{{ lookup('file', '/home/startcloud/.ssh/id_ssh_rsa.pub') }}"
-
 -
-  name: "Disabling Default Startcloud SSH Key"
-  ansible.builtin.lineinfile:
-    path: /home/startcloud/.ssh/authorized_keys
-    state: absent
-    regexp: '^%vagrantup'
+  name: "Setting ownership of SSH files"
+  ansible.builtin.file:
+    owner: startcloud
+    group: startcloud
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+  with_items:
+    - "/home/startcloud/.ssh"
+
+- 
+  name: "Copying the public key to the remote server"
+  ansible.posix.authorized_key:
+    user: startcloud
+    state: present
+    exclusive: false
+    key: "{{ lookup('file', '/home/startcloud/.ssh/id_ssh_rsa.pub') }}"
+
