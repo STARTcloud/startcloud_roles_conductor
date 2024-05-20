@@ -122,7 +122,7 @@
         - 
           name: "Waiting for 3 seconds for IP to set"
           ansible.builtin.pause:
-            seconds: 5
+            seconds: 2
     
         -
           name: "Grabbing updated second adapter IP address"
@@ -173,7 +173,7 @@
         - 
           name: "Waiting for 3 seconds for IP to set for Vagrant NAT Adapter"
           ansible.builtin.pause:
-            seconds: 5
+            seconds: 2
     
         -
           name: "Grabbing updated first adapter IP address"
