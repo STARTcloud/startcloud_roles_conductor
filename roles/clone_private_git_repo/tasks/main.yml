@@ -1,0 +1,84 @@
+---
+-
+  name: "Ensuring destination directory exists"
+  file:
+    path: "{{ git_dest }}"
+    state: directory
+
+-
+  name: "Writing vault password to file"
+  copy:
+    content: "{{ git_vault_password }}"
+    dest: "{{ git_dest }}/{{ github_repo }}-vault-password"
+    mode: '0600'
+
+-
+  name: "Placing Vault File"
+  ansible.builtin.copy:
+    mode: '0755'
+    decrypt: false
+    dest: "{{ git_dest }}/{{ github_token_file }}"
+    src: "{{ github_token_file }}"
+
+-
+  name: "Decrypting github_token from variable"
+  command: "ansible-vault view --vault-password-file {{ git_dest }}/{{ github_repo }}-vault-password {{ git_dest }}/{{ github_token_file }}"
+  register: decrypted_vault_output
+  no_log: true
+
+-
+  name: "Cloning Git repository"
+  git:
+    repo: "https://{{ decrypted_vault_output.stdout | regex_replace('^github_token:\\s*', '') }}@github.com/{{ github_org }}/{{ github_repo }}.git"
+    dest: "{{ git_dest }}/{{ github_repo }}"
+    version: "{{ github_branch }}"
+    accept_hostkey: yes
+    force: yes
+
+-
+  name: "Finding roles folder one level deep"
+  find:
+    paths: "{{ git_dest }}/{{ github_repo }}"
+    patterns: "roles"
+    file_type: directory
+    recurse: yes
+    depth: 2
+  register: roles_folder
+
+-
+  name: "Set parent_folder if roles folder is found"
+  set_fact:
+    parent_folder: "{{ roles_folder.files[0].path | dirname }}"
+  when: roles_folder.matched > 0
+
+-
+  name: "Copying roles to /vagrant/ansible/roles"
+  copy:
+    src: "{{ parent_folder }}/roles/"
+    dest: "/vagrant/ansible/roles/"
+    mode: '0755'
+    owner: root
+    group: root
+  when: roles_folder.matched > 0
+
+-
+  name: "Gathering list of roles"
+  find:
+    paths: "{{ parent_folder }}/roles"
+    file_type: directory
+    recurse: no
+  register: found_roles
+  when: roles_folder.matched > 0
+
+-
+  name: "Set roles_to_run if not defined"
+  set_fact:
+    roles_to_run: "{{ found_roles.files | map(attribute='path') | map('basename') }}"
+  when: roles_to_run is not defined or roles_to_run | length == 0
+
+-
+  name: "Including roles from Private Repo"
+  include_role:
+    name: "{{ item }}"
+  loop: "{{ roles_to_run }}"
+  when: roles_folder.matched > 0 and (git_build or git_deploy)
