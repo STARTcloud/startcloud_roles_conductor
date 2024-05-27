@@ -14,11 +14,14 @@
 -
   name: "Sets the password for {{ mariadb_admin_user }}"
   become: true
-  ignore_errors: true
   community.mysql.mysql_user:
     user: "{{ mariadb_admin_user }}"
     password: "{{ mariadb_admin_pass }}"
     host: localhost
+  register: set_password_result
+  failed_when:
+    - set_password_result.failed
+    - "'ERROR' in set_password_result.msg"
 
 -
   name: "Securing MariaDB"

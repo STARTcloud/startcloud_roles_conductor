@@ -4,9 +4,9 @@
 
 **Note:** Please consider using the official [NGINX Ansible role](https://github.com/nginxinc/ansible-role-nginx) from NGINX, Inc.
 
-Installs Nginx on RedHat/CentOS, Debian/Ubuntu, Archlinux, FreeBSD or OpenBSD servers.
+Installs Nginx on RedHat/CentOS, Debian/Ubuntu, ArchLinux, FreeBSD or OpenBSD servers.
 
-This role installs and configures the latest version of Nginx from the Nginx yum repository (on RedHat-based systems), apt (on Debian-based systems), pacman (Archlinux), pkgng (on FreeBSD systems) or pkg_add (on OpenBSD systems). You will likely need to do extra setup work after this role has installed Nginx, like adding your own [virtualhost].conf file inside `/etc/nginx/conf.d/`, describing the location and options to use for your particular website.
+This role installs and configures the latest version of Nginx from the Nginx yum repository (on RedHat-based systems), apt (on Debian-based systems), pacman (ArchLinux), pkgng (on FreeBSD systems) or pkg_add (on OpenBSD systems). You will likely need to do extra setup work after this role has installed Nginx, like adding your own [virtualhost].conf file inside `/etc/nginx/conf.d/`, describing the location and options to use for your particular website.
 
 ## Requirements
 
@@ -35,7 +35,7 @@ A list of vhost definitions (server blocks) for Nginx virtual hosts. Each entry 
         access_log: ""
         error_log: ""
         state: "present"
-        template: "{{ nginx_vhost_template }}"
+        ansible.builtin.template: "{{ nginx_vhost_template }}"
         filename: "example.com.conf"
         extra_parameters: |
           location ~ \.php$ {
@@ -160,7 +160,7 @@ Configures Nginx's [`log_format`](http://nginx.org/en/docs/http/ngx_http_log_mod
 (For Suse only) Set this to `false` to disable the installation of the `nginx` zypper repository. This could be necessary if you want the default OS stable packages, or if you use Suse Manager.
 
     nginx_service_state: started
-    nginx_service_enabled: yes
+    nginx_service_enabled: true
 
 By default, this role will ensure Nginx is running and enabled at boot after Nginx is configured. You can use these variables to override this behavior if installing in a container or further control over the service state is required.
 
@@ -181,11 +181,11 @@ nginx_vhosts:
     server_name: "site1.example.com"
     root: "/var/www/site1.example.com"
     index: "index.php index.html index.htm"
-    template: "{{ playbook_dir }}/templates/site1.example.com.vhost.j2"
+    ansible.builtin.template: "{{ playbook_dir }}/templates/site1.example.com.vhost.j2"
   - server_name: "site2.example.com"
     root: "/var/www/site2.example.com"
     index: "index.php index.html index.htm"
-    template: "{{ playbook_dir }}/templates/site2.example.com.vhost.j2"
+    ansible.builtin.template: "{{ playbook_dir }}/templates/site2.example.com.vhost.j2"
 ```
 
 You can either copy and modify the provided template, or extend it with [Jinja2 template inheritance](http://jinja.pocoo.org/docs/2.9/templates/#template-inheritance) and override the specific template block you need to change.
@@ -198,10 +198,10 @@ Set the `nginx_conf_template` to point to a template file in your playbook direc
 nginx_conf_template: "{{ playbook_dir }}/templates/nginx.conf.j2"
 ```
 
-Create the child template in the path you configured above and extend `geerlingguy.nginx` template file relative to your `playbook.yml`.
+Create the child template in the path you configured above and extend `startcloud.startcloud_roles.nginx` template file relative to your `playbook.yml`.
 
 ```
-{% extends 'roles/geerlingguy.nginx/templates/nginx.conf.j2' %}
+{% extends 'roles/startcloud.startcloud_roles.nginx/templates/nginx.conf.j2' %}
 
 {% block http_gzip %}
     gzip on;
@@ -239,7 +239,7 @@ None.
 
     - hosts: server
       roles:
-        - { role: geerlingguy.nginx }
+        - { role: startcloud.startcloud_roles.nginx }
 
 ## License
 

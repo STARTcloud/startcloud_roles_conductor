@@ -92,22 +92,61 @@
     src: "mysql-connector-j-{{ mariadb_mysql_java_connector_version }}.jar"
 
 -
-  name: "Downloading Guacamole Server"
-  when: not guacamole_installed_check.stat.exists
-  ansible.builtin.git:  # noqa: latest
-    dest: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-server"
-    repo: "https://github.com/apache/guacamole-server"
+  name: "Checking if Guacamole Server is already cloned"
+  register: guacamole_server_check
+  ansible.builtin.stat:
+    path: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-server/.git"
 
 -
-  name: "Downloading Guacamole Client"
-  when: not guacamole_installed_check.stat.exists
-  ansible.builtin.git:  # noqa: latest
-    dest: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-client"
+  name: "Updating Guacamole Server repository"
+  when: guacamole_server_check.stat.exists
+  ansible.builtin.git:
+    repo: "https://github.com/apache/guacamole-server"
+    dest: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-server"
+    version: "main"  # Specify the branch, tag, or commit
+    update: true
+  changed_when: guacamole_server_check.stat.exists
+
+-
+  name: "Cloning Guacamole Server repository"
+  when: not guacamole_server_check.stat.exists
+  ansible.builtin.git:
+    repo: "https://github.com/apache/guacamole-server"
+    dest: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-server"
+    version: "main"  # Specify the branch, tag, or commit
+    update: false
+    force: true
+
+-
+  name: "Checking if Guacamole Client is already cloned"
+  register: guacamole_client_check
+  ansible.builtin.stat:
+    path: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-client/.git"
+
+-
+  name: "Updating Guacamole Client repository"
+  when: guacamole_client_check.stat.exists
+  ansible.builtin.git:
     repo: "https://github.com/apache/guacamole-client"
+    dest: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-client"
+    version: "main"  # Specify the branch, tag, or commit
+    update: true
+  changed_when: guacamole_client_check.stat.exists
+
+-
+  name: "Cloning Guacamole Client repository"
+  when: not guacamole_client_check.stat.exists
+  ansible.builtin.git:
+    repo: "https://github.com/apache/guacamole-client"
+    dest: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-client"
+    version: "main"  # Specify the branch, tag, or commit
+    update: false
+    force: true
 
 -
   name: "Preparing Guacamole Source for Compilation"
   when: not guacamole_installed_check.stat.exists
+  changed_when: false
   ansible.builtin.shell: "autoreconf -fi && ./configure --with-systemd-dir=/etc/systemd/system"
   args:
     chdir: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-server"
@@ -116,6 +155,7 @@
   name: "Compiling Guacamole Server from Source"
   when: not guacamole_installed_check.stat.exists
   ansible.builtin.shell: "make && make install && ldconfig"
+  changed_when: false
   args:
     chdir: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-server"
 
@@ -124,6 +164,7 @@
   when: not guacamole_installed_check.stat.exists
   become: true
   ansible.builtin.shell: "{{ item.shell }}"
+  changed_when: false
   args:
     chdir: "/usr/local/src/guacamole/{{ guacamole_version }}/guacamole-client"
     executable: "/bin/bash"
@@ -258,7 +299,8 @@
 
 -
   name: "Fixing bug with JDBC Driver over Version 8"
-  ansible.builtin.shell: "mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u{{ mariadb_admin_user }} mysql -p{{ mariadb_admin_pass }}"
+  changed_when: false
+  ansible.builtin.shell: "set -o pipefail && mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u{{ mariadb_admin_user }} mysql -p{{ mariadb_admin_pass }}"
 
 -
   name: "Import Schema into database {{ guacamole_mariadb_db }}"

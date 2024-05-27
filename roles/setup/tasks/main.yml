@@ -9,7 +9,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0777
+    mode: "0777"
   with_items:
     - "{{ completed_dir }}"
     - "/root/.ansible/tmp"
@@ -24,7 +24,7 @@
     mode: 'a+x'
 
 -
-  name: "Printing out {{ provisioner_name }} version used"
+  name: "Printing out version used for {{ provisioner_name }}"
   ansible.builtin.debug:
     msg: "This Ansible Playbook was Generated with {{ provisioner_name }} v{{ provisioner_version }}"
 
@@ -34,7 +34,7 @@
     msg: "This Ansible Playbook was Generated with core_provisioner v{{ core_provisioner_version }}"
 
 -
-  name: "Writing current variables to /vagrant/support-bundle/{{ provisioner_name }}-version.json"
+  name: "Writing current variables to json in /vagrant/support-bundle/"
   ansible.builtin.copy:
     content: "{{ provisioner_version }}"
     dest: "/vagrant/support-bundle/{{ provisioner_name }}-version.json"

@@ -122,6 +122,7 @@
     -
       name: "Updating system's certificate store"
       ansible.builtin.command: update-ca-certificates
+      changed_when: false
 
     -
       name: "Generating Servers self signed SSL Key"

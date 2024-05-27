@@ -7,14 +7,14 @@
     enabled: false
   loop: "{{ lockdown }}"
 
-- 
+-
   name: "Changing startcloud Password"
-  user:
+  ansible.builtin.user:
     name: "startcloud"
     state: present
     password: "{{ settings.vagrant_user_pass | password_hash('sha512') }}"
 
-- 
+-
   name: "Generating an OpenSSH keypair with the default values"
   community.crypto.openssh_keypair:
     owner: startcloud
@@ -32,11 +32,10 @@
   with_items:
     - "/home/startcloud/.ssh"
 
-- 
+-
   name: "Copying the public key to the remote server"
   ansible.posix.authorized_key:
     user: startcloud
     state: present
     exclusive: false
     key: "{{ lookup('file', '/home/startcloud/.ssh/id_ssh_rsa.pub') }}"
-

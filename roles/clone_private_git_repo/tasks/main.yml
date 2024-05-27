@@ -1,13 +1,14 @@
 ---
 -
   name: "Ensuring destination directory exists"
-  file:
+  ansible.builtin.file:
     path: "{{ git_dest }}"
     state: directory
+    mode: '0755'
 
 -
   name: "Writing vault password to file"
-  copy:
+  ansible.builtin.copy:
     content: "{{ git_vault_password }}"
     dest: "{{ git_dest }}/{{ github_repo }}-vault-password"
     mode: '0600'
@@ -19,41 +20,43 @@
     decrypt: false
     dest: "{{ git_dest }}/{{ github_token_file }}"
     src: "{{ github_token_file }}"
+  tags: ['skip_ansible_lint']
 
 -
   name: "Decrypting github_token from variable"
-  command: "ansible-vault view --vault-password-file {{ git_dest }}/{{ github_repo }}-vault-password {{ git_dest }}/{{ github_token_file }}"
+  ansible.builtin.command: "ansible-vault view --vault-password-file {{ git_dest }}/{{ github_repo }}-vault-password {{ git_dest }}/{{ github_token_file }}"
   register: decrypted_vault_output
+  changed_when: false
   no_log: true
 
 -
   name: "Cloning Git repository"
-  git:
+  ansible.builtin.git:
     repo: "https://{{ decrypted_vault_output.stdout | regex_replace('^github_token:\\s*', '') }}@github.com/{{ github_org }}/{{ github_repo }}.git"
     dest: "{{ git_dest }}/{{ github_repo }}"
     version: "{{ github_branch }}"
-    accept_hostkey: yes
-    force: yes
+    accept_hostkey: true
+    force: true
 
 -
   name: "Finding roles folder one level deep"
-  find:
+  ansible.builtin.find:
     paths: "{{ git_dest }}/{{ github_repo }}"
     patterns: "roles"
     file_type: directory
-    recurse: yes
+    recurse: true
     depth: 2
   register: roles_folder
 
 -
   name: "Setting parent_folder if roles folder is found"
-  set_fact:
+  ansible.builtin.set_fact:
     parent_folder: "{{ roles_folder.files[0].path | dirname }}"
   when: roles_folder.matched > 0
 
 -
   name: "Copying roles to /vagrant/ansible/roles"
-  copy:
+  ansible.builtin.copy:
     src: "{{ parent_folder }}/roles/"
     dest: "/vagrant/ansible/roles/"
     mode: '0755'
@@ -63,22 +66,22 @@
 
 -
   name: "Gathering list of roles"
-  find:
+  ansible.builtin.find:
     paths: "{{ parent_folder }}/roles"
     file_type: directory
-    recurse: no
+    recurse: false
   register: found_roles
   when: roles_folder.matched > 0
 
 -
   name: "Setting roles_to_run if not defined"
-  set_fact:
+  ansible.builtin.set_fact:
     roles_to_run: "{{ found_roles.files | map(attribute='path') | map('basename') }}"
   when: roles_to_run is not defined or roles_to_run | length == 0
 
 -
   name: "Including roles from Private Repo"
-  include_role:
+  ansible.builtin.include_role:
     name: "{{ item }}"
   loop: "{{ roles_to_run }}"
   when: roles_folder.matched > 0 and (git_build or git_deploy)

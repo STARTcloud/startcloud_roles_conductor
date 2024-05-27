@@ -9,8 +9,9 @@ issues: https://github.com/STARTcloud/startcloud_roles/issues
 description: "A collection of roles for the STARTcloud Environment"
 authors:
   - "MarkProminic"
-license: 
+license:
   - GPL-2.0-or-later
 tags:
   - startcloud
   - roles
+  - linux

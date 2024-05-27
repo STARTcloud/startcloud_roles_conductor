@@ -1,7 +1,6 @@
 ---
-## This Ansible playbook demonstrates the setup of a Python Simple HTTP server within a virtual environment, 
-## including directory creation, package installation, service configuration, and support bundle generation. 
-
+## This Ansible playbook demonstrates the setup of a Python Simple HTTP server within a virtual environment,
+## including directory creation, package installation, service configuration, and support bundle generation.
 # It's designed to be easily understood and replicated by team members.
 
 -
@@ -24,7 +23,7 @@
   name: "Registering Output of IP Address" # Captures the output of a command to retrieve the IP address.
   ansible.builtin.command: "cat {{ completed_dir }}/ipaddress.yml" # Executes the command to read the IP address.
   changed_when: false # Indicates that this task does not change the system state.
-  register: netoutput ##Stores the output for later use.
+  register: netoutput # Stores the output for later use.
 
 -
   name: "Placing Python Simple HTTP Server Service file" # Copies service configuration files to their respective locations.
