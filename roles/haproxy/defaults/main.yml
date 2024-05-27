@@ -2,7 +2,7 @@
 haproxy_http_port: 80
 haproxy_https_port: 443
 haproxy_ssl_redirect: true
-haproxy_default_backend: downloads
+haproxy_default_backend: "{{ 'downloads' if startcloud_quick_start_proxy_url is defined }}"
 startcloud_haproxy_port_forwards:
   -
     guest: 80
@@ -13,4 +13,3 @@ startcloud_haproxy_port_forwards:
   -
     guest: 444
     url: "stats"
-startcloud_haproxy_proxy_url: "{{ startcloud_haproxy_port_forwards[1].url }}.{{ settings.hostname }}.{{ settings.domain }}"

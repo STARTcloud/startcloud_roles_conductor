@@ -46,7 +46,7 @@
   register: roles_folder
 
 -
-  name: "Set parent_folder if roles folder is found"
+  name: "Setting parent_folder if roles folder is found"
   set_fact:
     parent_folder: "{{ roles_folder.files[0].path | dirname }}"
   when: roles_folder.matched > 0
@@ -71,7 +71,7 @@
   when: roles_folder.matched > 0
 
 -
-  name: "Set roles_to_run if not defined"
+  name: "Setting roles_to_run if not defined"
   set_fact:
     roles_to_run: "{{ found_roles.files | map(attribute='path') | map('basename') }}"
   when: roles_to_run is not defined or roles_to_run | length == 0

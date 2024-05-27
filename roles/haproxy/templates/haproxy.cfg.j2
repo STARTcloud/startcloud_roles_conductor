@@ -220,7 +220,7 @@ frontend  HTTPS-IN
 {% if startcloud_quick_start_proxy_url is defined %}
         use_backend                   downloads            if host_downloads || host_direct_ip
 {% endif %}
-{% if haproxy_default_backend is defined %}
+{% if haproxy_default_backend is defined and haproxy_default_backend | length > 0 %}
         default_backend               {{ haproxy_default_backend }}
 {% endif %}
 
