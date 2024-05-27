@@ -1,0 +1,214 @@
+---
+-
+  name: "Create Directories for SSLs"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ service_user }}"
+    group: "{{ service_group }}"
+    mode: '0777'
+  with_items:
+    - "{{ cert_dir }}"
+    - "{{ cert_dir }}/key"
+    - "{{ cert_dir }}/crt"
+    - "{{ cert_dir }}/csr"
+    - "{{ cert_dir }}/pfx"
+    - "{{ cert_dir }}/kyr"
+    - "{{ cert_dir }}/jks"
+    - "{{ cert_dir }}/combined"
+    - "{{ cert_dir }}/ca"
+
+-
+  name: "Using existing Certificate"
+  when: not selfsigned_enabled
+  block:
+    -
+      name: "Checking if SSL default certs exists"
+      ansible.builtin.wait_for:
+        path: "{{ item }}"
+      with_items:
+        - "{{ cert_dir }}/key/default-signed.key"
+        - "{{ cert_dir }}/crt/default-signed.crt"
+        - "{{ cert_dir }}/ca/default-signed.ca"
+
+    -
+      name: "Generating Signed PKCS12 file"
+      community.crypto.openssl_pkcs12:
+        action: export
+        path: "{{ cert_dir }}/pfx/default-signed.pfk"
+        certificate_path: "{{ cert_dir }}/crt/default-signed.crt"
+        privatekey_path: "{{ cert_dir }}/key/default-signed.key"
+        other_certificates_parse_all: true
+        other_certificates:
+          - "{{ cert_dir }}/ca/default-signed.ca"
+        state: present
+        friendly_name: 'pkcs12_file'
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Parsing PKCS12 file to concatenated PEM"
+      community.crypto.openssl_pkcs12:
+        action: parse
+        src: "{{ cert_dir }}/pfx/default-signed.pfk"
+        path: "{{ cert_dir }}/combined/default-signed.pem"
+        state: present
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Creating a keystore for the given certificate/private key pair"
+      become: true
+      community.general.java_keystore:
+        name: "{{ settings.hostname }}.{{ settings.domain }}"
+        certificate: "{{ lookup('file', '{{ cert_dir }}/crt/default-signed.crt') }}"
+        private_key: "{{ lookup('file', '{{ cert_dir }}/key/default-signed.key') }}"
+        password: "{{ cert_pass }}"
+        owner: "{{ service_user }}"
+        mode: '0777'
+        dest: "{{ cert_dir }}/jks/default-signed.jks"
+      environment:
+        PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+
+-
+  name: "Generating Self Signed Certificate"
+  when: selfsigned_enabled
+  block:
+    -
+      name: "Creating private key for Certifcate Authority"
+      community.crypto.openssl_privatekey:
+        path: "{{ cert_dir }}/ca/ca-certificate.key"
+        passphrase: "{{ cert_pass }}"
+        cipher: 'auto'
+        mode: '0777'
+
+    -
+      name: "Creating certificate signing request (CSR) for Certifcate Authority certificate"
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+        privatekey_passphrase: "{{ cert_pass }}"
+        common_name: "{{ settings.domain }}"
+        country_name: "{{ countrycode }}"
+        organization_name: "{{ domino_organization }}"
+        use_common_name_for_san: false
+        basic_constraints:
+          - 'CA:TRUE'
+        basic_constraints_critical: true
+        key_usage:
+          - keyCertSign
+        key_usage_critical: true
+      register: ca_csr
+
+    -
+      name: "Creating self-signed CA certificate from CA CSR"
+      community.crypto.x509_certificate:
+        path: "{{ cert_dir }}/ca/ca-certificate.pem"
+        csr_content: "{{ ca_csr.csr }}"
+        privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+        privatekey_passphrase: "{{ cert_pass }}"
+        provider: selfsigned
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Copying root CA certificate to trusted certificates directory"
+      ansible.builtin.copy:
+        src: "{{ cert_dir }}/ca/ca-certificate.pem"
+        dest: "/usr/local/share/ca-certificates/ca-certificate.pem"
+        owner: root
+        group: root
+        mode: '0644'
+
+    -
+      name: "Updating system's certificate store"
+      ansible.builtin.command: update-ca-certificates
+      changed_when: false
+
+    -
+      name: "Generating Servers self signed SSL Key"
+      community.crypto.openssl_privatekey:
+        path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+        owner: "{{ service_user }}"
+        type: "RSA"
+        mode: '0777'
+
+    -
+      name: "Setting DNS entries as a fact"
+      ansible.builtin.set_fact:
+        dns_entries: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
+      loop:
+        - nomadweb
+        - domino
+        - traveler
+        - verse
+        - console
+        - logging
+        - welcome
+        - proxy
+        - downloads
+        - sametime
+        - leap
+        - restapi
+        - guacamole
+        - voltmx
+        - www
+
+    -
+      name: "Generating an OpenSSL CSR with subjectAltName extension with dynamic list"
+      community.crypto.openssl_csr:
+        path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
+        privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+        subject_alt_name: "{{ dns_entries | list }}"
+        country_name: "{{ countrycode }}"
+        organization_name: "{{ domino_organization }}"
+        common_name: "{{ settings.hostname }}.{{ settings.domain }}"
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Generating self signed Certificate"
+      community.crypto.x509_certificate:
+        path: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt"
+        privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+        csr_path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
+        provider: ownca
+        ownca_path: "{{ cert_dir }}/ca/ca-certificate.pem"
+        ownca_privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+        ownca_privatekey_passphrase: "{{ cert_pass }}"
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Generating self signed PKCS12 file"
+      community.crypto.openssl_pkcs12:
+        action: export
+        path: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pfk"
+        certificate_path: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt"
+        privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+        state: present
+        friendly_name: 'pkcs12_file'
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Parsing self-signed PKCS12 file to concatenated PEM"
+      community.crypto.openssl_pkcs12:
+        action: parse
+        src: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pfk"
+        path: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pem"
+        state: present
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Creating a keystore for the self-signed certificate/private key pair"
+      community.general.java_keystore:
+        name: "{{ settings.hostname }}.{{ settings.domain }}"
+        certificate: "{{ lookup('file', '{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt') }}"
+        private_key: "{{ lookup('file', '{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key') }}"
+        password: "{{ cert_pass }}"
+        owner: "{{ service_user }}"
+        mode: '0777'
+        dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-self-signed.jks"
+      environment:
+        PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
