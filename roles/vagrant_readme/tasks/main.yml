@@ -1,7 +1,11 @@
 ---
 -
-  name: "Registering Output of available Commands"
-  ansible.builtin.command: "cat {{ completed_dir }}/ipaddress.yml"
+  name: "Grabbing External IP address"
+  ansible.builtin.shell: |
+    set -o pipefail
+    ip addr show public_adapter | awk '/inet / {print $2}' | cut -d'/' -f1
+  args:
+    executable: /bin/bash
   register: netoutput
   changed_when: false
 

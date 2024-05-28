@@ -20,10 +20,14 @@
     extra_args: --user --break-system-packages # Installs the package for the current user and allows breaking system packages if necessary.
 
 -
-  name: "Registering Output of IP Address" # Captures the output of a command to retrieve the IP address.
-  ansible.builtin.command: "cat {{ completed_dir }}/ipaddress.yml" # Executes the command to read the IP address.
-  changed_when: false # Indicates that this task does not change the system state.
-  register: netoutput # Stores the output for later use.
+  name: "Grabbing External IP address"
+  ansible.builtin.shell: |
+    set -o pipefail
+    ip addr show public_adapter | awk '/inet / {print $2}' | cut -d'/' -f1
+  args:
+    executable: /bin/bash
+  register: netoutput
+  changed_when: false
 
 -
   name: "Placing Python Simple HTTP Server Service file" # Copies service configuration files to their respective locations.

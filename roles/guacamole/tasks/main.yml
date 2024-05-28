@@ -187,6 +187,16 @@
       dest: "/var/lib/tomcat9/webapps/ROOT.war"
 
 -
+  name: "Grabbing External IP address"
+  ansible.builtin.shell: |
+    set -o pipefail
+    ip addr show public_adapter | awk '/inet / {print $2}' | cut -d'/' -f1
+  args:
+    executable: /bin/bash
+  register: netoutput
+  changed_when: false
+
+-
   name: "Creating Guacamole Configuration File"
   when: not guacamole_installed_check.stat.exists
   ansible.builtin.blockinfile:
