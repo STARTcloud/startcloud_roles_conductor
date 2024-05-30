@@ -64,7 +64,7 @@
     enabled: true # Enables the service to start on boot.
 
 -
-  name: "Ansible Playbook Into Support Bundle" # Archives the Ansible roles directory into a ZIP file for support purposes.
+  name: "Zipping Ansible Playbook Into Support Bundle" # Archives the Ansible roles directory into a ZIP file for support purposes.
   community.general.archive:
     mode: '0777'  # Sets the file permissions for the archive.
     path: "/vagrant/ansible" # Specifies the directory to archive.
