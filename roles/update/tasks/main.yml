@@ -1,0 +1,83 @@
+---
+- 
+  name: "Ensure apt cache is updated."
+  ansible.builtin.apt:
+    cache_valid_time: 3600
+    update_cache: true
+
+- 
+  name: "Enable Cockpit."
+  ansible.builtin.shell: "systemctl enable --now cockpit.socket"
+
+- 
+  name: "Upgrading all apt packages"
+  ansible.builtin.apt:
+    force_apt_get: true
+    upgrade: dist
+  
+- 
+  name: "Check if a reboot is needed for Debian and Ubuntu boxes"
+  register: reboot_required_file
+  ansible.builtin.stat: 
+    path: /var/run/reboot-required
+    get_md5: no
+
+- 
+  name: "Creating directory for Auto Login in Terminal"
+  ansible.builtin.file:
+    path: /etc/systemd/system/serial-getty@ttyS0.service.d
+    state: directory
+
+#-
+#  ansible.builtin.lineinfile:
+#    create: true
+#    line: "{{ item }}"
+#    path: /etc/systemd/system/serial-getty@ttyS0.service.d/override.conf
+#  name: "Enable Auto Login configuration"
+#
+#  with_items:
+#    - "[Service]"
+#    - ExecStart=
+#    - "ExecStart=/sbin/agetty --autologin root -8 --keep-baud 115200,38400,9600 ttyS0 $TERM"
+
+- 
+  name: "Ensuring that a Serial Terminal is enabled in Grub"
+  ansible.builtin.lineinfile:
+    line: "{{ item.line }}"
+    path: /etc/default/grub
+    regexp: "{{ item.regexp }}"
+
+  with_items:
+    - line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet"'
+      regexp: ^GRUB_CMDLINE_LINUX_DEFAULT=
+    - line: 'GRUB_CMDLINE_LINUX="console=tty0 console=ttyS0,115200n8"'
+      regexp: ^GRUB_CMDLINE_LINUX=
+
+- 
+  name: "Updating Grub"
+  ansible.builtin.apt:
+    name:
+      - grub-efi-amd64-bin
+      - grub-pc-bin
+    state: present
+    update_cache: true
+
+- 
+  name: "Updating Grub"
+  ansible.builtin.shell: grub-install --target=i386-pc /dev/sda
+
+- 
+  name: "Updating Grub"
+  ansible.builtin.shell: update-grub
+
+- 
+  ansible.builtin.file:
+    path: /boot/efi/EFI/boot
+    state: directory
+  name: "Creating proper EFI Directory for all BIOS/UEFI Loaders"
+
+- 
+  name: "Creating Grub boot dir for EFI"
+  become: true
+  ansible.builtin.shell: "cp /boot/efi/EFI/debian/grubx64.efi /boot/efi/EFI/boot/bootx64.efi"
+

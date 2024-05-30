@@ -1,0 +1,19 @@
+---
+-   
+  name: "Ensuring apt cache is updated"
+  ansible.builtin.apt:
+    cache_valid_time: 3600
+    update_cache: true  
+  when: "ansible_os_family == 'Debian'"
+
+-
+  name: "Installing Linphone"
+  ansible.builtin.apt:
+    name:
+      - linphone
+
+-
+  name: "Pinning linphone"
+  ansible.builtin.dpkg_selections:
+    name: linphone
+    selection: hold

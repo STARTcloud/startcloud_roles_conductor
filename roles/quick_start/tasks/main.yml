@@ -129,6 +129,14 @@
     format: zip # Uses ZIP format for the archive.
 
 -
+  name: Zip Support Bundle
+  community.general.archive:
+    mode: '0777'
+    path: "/vagrant/support-bundle"
+    dest: "/vagrant/support-bundle.zip"
+    format: zip
+
+-
   name: "Restarting Cockpit" # Restarts the Cockpit service.
   ansible.builtin.systemd:
     state: restarted # Restarts the service.

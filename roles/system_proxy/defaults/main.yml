@@ -1,0 +1,12 @@
+---
+proxy:
+  - 
+    user: dante
+    pass: ZDDtYr9a3sMRnc
+    host: proxy-s1-n1.prominic.global
+    port: 1080
+  - 
+    user: dante
+    pass: oTrgZenEcbLuQ5
+    host: proxy-s2-n1.prominic.global
+    port: 1080

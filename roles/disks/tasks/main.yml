@@ -1,0 +1,76 @@
+---
+-
+  name: "Expandinging Root Disk"
+  block:
+    - 
+      name: "Extending the unecrypted Root Partition"
+      shell: "{{ item }}"
+      when: ansible_os_family == 'Debian'
+      become: true
+      ignore_errors: true
+      with_items:
+        - "growpart  /dev/vda 4"
+        - "resize2fs /dev/vda4"
+        - "growpart  /dev/nvme0n1 4"
+        - "resize2fs /dev/nvme0n1p4"
+  when: 'vm_encrypted'
+  become: true
+  become_user: root
+
+-
+  name: "Creating extra partitions"
+  block:
+    -
+      name: "Creating Mount Points"
+      become: true
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items: "{{ additional_disks_mounts }}"
+
+    -
+      name: "Grabbing unmounted Disks"
+      become: true
+      shell: lsblk | awk '{if($7==""){print $0}}' | grep -v 'vda\|nvme0n1' | awk '{print $1}'
+      args:
+        executable: /bin/bash
+      register: unmounted_disks
+
+    - 
+      name: "Creating a xfs filesystems on partitions"
+      filesystem:
+        fstype: xfs
+        dev: "/dev/{{ item }}"
+      loop: "{{ unmounted_disks.stdout_lines }}"
+      loop_control:
+        index_var: my_idx
+
+    - 
+      name: "Mounting Partitions"
+      mount:
+        path: "{{ additional_disks_mounts[my_idx] }}"
+        src: "/dev/{{ item }}"
+        fstype: xfs
+        state: mounted
+      loop: "{{ unmounted_disks.stdout_lines }}"
+      loop_control:
+        index_var: my_idx
+  when: 'ansible_virtualization_type != "virtualbox"'
+  become: true
+  become_user: root
+
+#- 
+#  name: "Extending the encrypted Root Partition"
+#  shell: "{{ item }}"
+#  when: ansible_os_family == 'Debian'
+#  become: true
+#  ignore_errors: true
+#  with_items:
+#    - "growpart  /dev/vda 3"
+#    - "growpart  /dev/vda 3"
+#    - "echo {{ root_unlock_key }} | sudo cryptsetup resize /dev/mapper/sda3_crypt"
+#    - "pvresize /dev/mapper/sda3_crypt"
+#    - "lvresize -l+100%FREE /dev/crypt/root"
+#    - "resize2fs /dev/mapper/crypt-root"
+
+## Bhyve uses VDA and currently Vbox uses SDA (virtio v sata) the ignore_errors flag allows us to auto expand on provisioning any time the underly disk is increased.

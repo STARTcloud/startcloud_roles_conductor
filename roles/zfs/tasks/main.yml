@@ -1,0 +1,47 @@
+---
+-
+  name: "Upgrade all apt packages"
+  when: ansible_os_family == 'Debian' and (deb_architecture.stdout == 'arm64' or deb_architecture.stdout == 'armhf')
+  ansible.builtin.apt:
+    name:
+      - zfs-auto-snapshot
+      - zfs-zed
+      - zfsutils-linux
+
+- 
+  name: "Removes zfs-auto-snapshot file from under /etc/cron.d"
+  ansible.builtin.file:
+    path: "{{ item.path }}{{ item.file }}"
+    state: absent
+  with_items:
+    - file: zfs-auto-snapshot
+      path: /etc/cron.d/
+    - file: zfs-auto-snapshot
+      path: /etc/cron.daily/
+    - file: zfs-auto-snapshot
+      path: /etc/cron.weekly/
+    - file: zfs-auto-snapshot
+      path: /etc/cron.hourly/
+    - file: zfs-auto-snapshot
+      path: /etc/cron.monthly/
+- 
+  name: "Add zfs-auto-snapshot Configurations"
+  ansible.builtin.template:
+    dest: "{{ item.dest }}{{ item.path }}{{ item.file }}"
+    src: "{{ item.path }}{{ item.file }}.j2"
+  with_items:
+    - dest: /etc/
+      file: zfs-auto-snapshot
+      path: cron.monthly/
+    - dest: /etc/
+      file: zfs-auto-snapshot
+      path: cron.daily/
+    - dest: /etc/
+      file: zfs-auto-snapshot
+      path: cron.hourly/
+    - dest: /etc/
+      file: zfs-auto-snapshot
+      path: cron.daily/
+    - dest: /etc/
+      file: zfs-auto-snapshot
+      path: cron.d/

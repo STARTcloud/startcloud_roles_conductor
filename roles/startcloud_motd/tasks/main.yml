@@ -1,0 +1,110 @@
+---
+- 
+  block:
+    - 
+      name: "Creating backup folder"
+      ansible.builtin.file:
+        path: /etc/update-motd.d/backups
+        state: directory
+
+    - 
+      name: "Checking if we need to move files"
+      register: move_output
+      ansible.builtin.shell: "ls /etc/update-motd.d/ --ignore=99-footer --ignore=20-update --ignore=backups"
+
+    - 
+      name: "Moving files to backup folder"
+      args:
+        chdir: /etc/update-motd.d/
+      ansible.builtin.shell: "mv $(ls --ignore=99-footer --ignore=20-update --ignore=backups) /etc/update-motd.d/backups/"
+      when: 'move_output.stdout != ""'
+  name: "Remove default motd configuration"
+  when: remove_default_config
+
+- 
+  name: "Restoring default motd configuration from backups folder"
+  ansible.builtin.shell: "mv /etc/update-motd.d/backups/* /etc/update-motd.d/"
+  when: "restore_default_config and not remove_default_config"
+
+- 
+  name: "Adding 99-footer file"
+  ansible.builtin.copy:
+    dest: /etc/update-motd.d/99-footer
+    group: root
+    mode: 493
+    owner: root
+    src: 99-footer
+  tags:
+    - motd
+    - common
+  when: "add_footer | bool"
+
+- 
+  name: "Deleting 99-footer file"
+  ansible.builtin.file:
+    path: /etc/update-motd.d/99-footer
+    state: absent
+  tags:
+    - motd
+    - common
+  when: "not add_footer | bool"
+
+- 
+  name: "Adding dynamic message before motd"
+  tags:
+    - motd
+    - common
+  ansible.builtin.template:
+    dest: /etc/update-motd.d/20-update
+    mode: a+x
+    src: etc/update-motd.d/20-update.j2
+  when: "add_update | bool"
+
+- 
+  name: "Removing dynamic message before motd"
+  ansible.builtin.file:
+    path: /etc/update-motd.d/20-update
+    state: absent
+  tags:
+    - motd
+    - common
+  when: "not add_update | bool"
+
+- 
+  name: "Deleting /etc/motd file"
+  ansible.builtin.file:
+    path: /etc/motd
+    state: absent
+  tags:
+    - motd
+    - common
+  when: "add_footer | bool"
+
+- 
+  name: "Checking motd tail supported"
+  register: tail_supported
+  ansible.builtin.stat:
+    path: /etc/update-motd.d/99-footer
+  tags:
+    - motd
+    - common
+
+- 
+  name: "Adding motd tail"
+  tags:
+    - motd
+    - common
+  ansible.builtin.template:
+    dest: /etc/motd.tail
+    src: etc/motd.j2
+  when: "tail_supported.stat.exists | bool"
+
+- 
+  name: "Adding motd"
+  tags:
+    - motd
+    - common
+  ansible.builtin.template:
+    dest: /etc/motd
+    src: etc/motd.j2
+  when: "not tail_supported.stat.exists | bool"

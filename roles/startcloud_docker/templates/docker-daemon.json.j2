@@ -1,0 +1,10 @@
+{
+  "log-driver": "journald",
+  "log-level": "warn",
+  "debug": false,
+  "dns": ["{{ dns1 }}", "{{ dns2 }}"],
+  "default-address-pools":
+  [
+    {"base":"10.2.0.0/16","size":24}
+  ]
+}
