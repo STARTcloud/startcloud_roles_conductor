@@ -44,7 +44,7 @@
     state: absent
 
 -
-  name: "Remove unneeded packages."
+  name: "Remove unwanted packages."
   ansible.builtin.apt:
     name:
       - snapd

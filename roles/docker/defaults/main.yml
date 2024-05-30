@@ -56,4 +56,14 @@ docker_yum_gpg_key: "{{ docker_repo_url }}/centos/gpg"
 docker_users: []
 
 # Docker daemon options as a dict
-docker_daemon_options: {}
+docker_daemon_options: {
+  "log-driver": "journald",
+  "log-level": "warn",
+  "debug": false,
+  "dns": ["{{ dns1 }}", "{{ dns2 }}"],
+  "default-address-pools":
+  [
+    {"base":"10.2.0.0/16","size":24}
+  ]
+}
+

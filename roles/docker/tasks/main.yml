@@ -89,8 +89,8 @@
   ansible.builtin.meta: flush_handlers
 
 -
-  name: Include tasks docker-compose.yml
-  ansible.builtin.include_tasks: docker-compose.yml
+  name: Include tasks setup-docker-compose.yml
+  ansible.builtin.include_tasks: setup-docker-compose.yml
   when: docker_install_compose | bool
 
 -
@@ -114,3 +114,21 @@
   name: Include tasks docker-users.yml
   ansible.builtin.include_tasks: docker-users.yml
   when: at_least_one_user_to_modify is defined
+
+-
+  name: "Setting Docker Daemon"
+  ansible.builtin.template:
+    src: "docker-daemon.json.j2"
+    dest: "/etc/docker/daemon.json"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+#-
+#  name: "Setting Docker SSL/TLS Service Options"
+#  ansible.builtin.template:
+#    src: "startup_options.conf.j2"
+#    dest: "/etc/systemd/system/docker.service.d/startup_options.conf"
+#    owner: "root"
+#    group: "root"
+#    mode: "0644"
