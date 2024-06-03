@@ -27,9 +27,9 @@
         update_cache: true
 
     -
-      name: "Adding Additional Dependencies {{ packages }}"
+      name: "Adding flatpak"
       ansible.builtin.apt:
-        name: "{{ packages }}"
+        name: flatpak
         state: present
 
 -

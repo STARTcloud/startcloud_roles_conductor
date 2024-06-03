@@ -1,76 +1,145 @@
 ---
 -
-  name: "Expandinging Root Disk"
-  block:
-    - 
-      name: "Extending the unecrypted Root Partition"
-      shell: "{{ item }}"
-      when: ansible_os_family == 'Debian'
-      become: true
-      ignore_errors: true
-      with_items:
-        - "growpart  /dev/vda 4"
-        - "resize2fs /dev/vda4"
-        - "growpart  /dev/nvme0n1 4"
-        - "resize2fs /dev/nvme0n1p4"
-  when: 'vm_encrypted'
+  name: "Expanding Root Disk"
   become: true
   become_user: root
+  when:
+    - not vm_encrypted
+    - ansible_os_family == 'Debian'    
+    - ansible_virtualization_type == "virtualbox"
+  block:
+    -
+      name: "Setting root partition fact"
+      ansible.builtin.set_fact:
+        root_partition: "{{ ansible_mounts | selectattr('mount', '==', '/') | map(attribute='device') | first | regex_replace('^/dev/', '') }}"
+
+    -
+      name: "Setting root partition fact"
+      ansible.builtin.set_fact:
+        root_disk: "{{ root_partition | regex_replace('[0-9]+$', '') }}"
+        root_partition_number: "{{ root_partition | regex_search('[0-9]+$') }}"
+
+    -
+      name: "Extending the unecrypted Root Partition"
+      ansible.builtin.shell: "{{ item }}"
+      ignore_errors: true
+      with_items:
+        - "growpart /dev/{{ root_disk }} {{ root_partition_number }}"
+        - "resize2fs /dev/{{ root_partition }}"
 
 -
-  name: "Creating extra partitions"
+  name: "Expanding the Encrypted Root Disk"
+  become: true
+  become_user: root
+  when:
+    - vm_encrypted
+    - ansible_os_family == 'Debian'
+    - ansible_virtualization_type == "virtualbox"
+  block:
+    -
+      name: "Setting root partition fact"
+      ansible.builtin.set_fact:
+        root_partition: "{{ ansible_mounts | selectattr('mount', '==', '/') | map(attribute='device') | first | regex_replace('^/dev/', '') }}"
+
+    -
+      name: "Setting root partition fact"
+      ansible.builtin.set_fact:
+        root_disk: "{{ root_partition | regex_replace('[0-9]+$', '') }}"
+        root_partition_number: "{{ root_partition | regex_search('[0-9]+$') }}"
+
+    -
+      name: "Extending the Encrypted Root Partition"
+      ansible.builtin.shell: "{{ item }}"
+      ignore_errors: true
+      with_items:
+        - "growpart /dev/{{ root_disk }} {{ root_partition_number }}"
+        - "echo {{ root_unlock_key }} | sudo cryptsetup resize /dev/mapper/{{ root_partition }}_crypt"
+        - "pvresize /dev/mapper/{{ root_partition }}_crypt"
+        - "lvresize -l+100%FREE /dev/crypt/root"
+        - "resize2fs /dev/mapper/crypt-root"
+
+-
+  name: "Configuring Extra Disks for bhyve"
+  become: true
+  become_user: root
+  when: 
+    - disks.additional_disks[0] is defined
+    - disks.additional_disks[0] is not string
+#    - disks.additional_disks[0] is not mapping
+#    - disks.additional_disks[0] is iterable
+    - disks.additional_disks[0] | length > 0
+    - ansible_virtualization_type != "virtualbox"
   block:
     -
       name: "Creating Mount Points"
       become: true
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-      with_items: "{{ additional_disks_mounts }}"
-
-    -
-      name: "Grabbing unmounted Disks"
-      become: true
-      shell: lsblk | awk '{if($7==""){print $0}}' | grep -v 'vda\|nvme0n1' | awk '{print $1}'
-      args:
-        executable: /bin/bash
-      register: unmounted_disks
+      with_items: "{{ disks.additional_disks[0].mount }}"
 
     - 
-      name: "Creating a xfs filesystems on partitions"
-      filesystem:
-        fstype: xfs
-        dev: "/dev/{{ item }}"
-      loop: "{{ unmounted_disks.stdout_lines }}"
-      loop_control:
-        index_var: my_idx
+      name: "Creating a {{ disks.additional_disks[0].filesystem }} filesystems on partitions"
+      ansible.builtin.filesystem:
+        fstype: "{{ disks.additional_disks[0].filesystem }}"
+        dev: "/dev/{{ disks.additional_disks[0].device }}"
 
     - 
       name: "Mounting Partitions"
-      mount:
-        path: "{{ additional_disks_mounts[my_idx] }}"
-        src: "/dev/{{ item }}"
-        fstype: xfs
+      ansible.builtin.mount:
+        path: "{{ disks.additional_disks[0].mount }}"
+        src: "/dev/{{ disks.additional_disks[0].device }}"
+        fstype: "{{ disks.additional_disks[0].filesystem }}"
         state: mounted
-      loop: "{{ unmounted_disks.stdout_lines }}"
-      loop_control:
-        index_var: my_idx
-  when: 'ansible_virtualization_type != "virtualbox"'
+
+-
+  name: "Configuring Extra Disks for Virtualbox"
   become: true
   become_user: root
+  when: 
+    - disks.additional_disks is defined
+    - disks.additional_disks | length > 0
+    - ansible_virtualization_type == "virtualbox"
+  block:
+    - 
+      name: "Gathering disk information"
+      block:
+        - 
+          name: "Identifying available disks"
+          ansible.builtin.shell: "lsblk -no NAME -x NAME | grep -v {{ root_disk }}"
+          register: lsblk_output
 
-#- 
-#  name: "Extending the encrypted Root Partition"
-#  shell: "{{ item }}"
-#  when: ansible_os_family == 'Debian'
-#  become: true
-#  ignore_errors: true
-#  with_items:
-#    - "growpart  /dev/vda 3"
-#    - "growpart  /dev/vda 3"
-#    - "echo {{ root_unlock_key }} | sudo cryptsetup resize /dev/mapper/sda3_crypt"
-#    - "pvresize /dev/mapper/sda3_crypt"
-#    - "lvresize -l+100%FREE /dev/crypt/root"
-#    - "resize2fs /dev/mapper/crypt-root"
+        - name: "Parsing available disks"
+          set_fact:
+            available_disks: "{{ lsblk_output.stdout_lines }}"
 
-## Bhyve uses VDA and currently Vbox uses SDA (virtio v sata) the ignore_errors flag allows us to auto expand on provisioning any time the underly disk is increased.
+        - name: "Debug: available_disks"
+          debug:
+            var: available_disks
+
+    - 
+      name: "Creating Mount Points"
+      ansible.builtin.file:
+        path: "{{ item.mount }}"
+        state: directory
+      loop: "{{ disks.additional_disks }}"
+
+    - 
+      name: "Creating filesystems on additional disks"
+      ansible.builtin.filesystem:
+        fstype: "{{ item.filesystem }}"
+        dev: "/dev/{{ available_disks[index] }}"
+      loop: "{{ disks.additional_disks }}"
+      loop_control:
+        index_var: index
+
+    - 
+      name: "Mounting additional disks"
+      ansible.builtin.mount:
+        path: "{{ item.mount }}"
+        src: "/dev/{{ available_disks[index] }}"
+        fstype: "{{ item.filesystem }}"
+        state: mounted
+      loop: "{{ disks.additional_disks }}"
+      loop_control:
+        index_var: index

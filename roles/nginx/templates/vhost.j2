@@ -27,10 +27,10 @@ server {
 {% if item.root is defined %}
     root {{ item.root }};
 {% endif %}
-
+{% if item.index is defined  and  item.index | length > 0 %}
     index {{ item.index | default('index.html index.htm') }};
-
-{% if item.error_page is defined %}
+{% endif %}
+{% if item.error_page is defined and item.error_page.strip() != '' %}
     error_page {{ item.error_page }};
 {% endif %}
 {% if item.access_log is defined %}

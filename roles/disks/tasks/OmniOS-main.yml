@@ -25,7 +25,7 @@
 #  become: true
 #  ansible.builtin.command: "zpool list -Ho name {{ zfs_pool_name }}"
 #  register: result_rpool_disk_list
-#  ignore_errors: yes
+#  ignore_errors: true
 #  changed_when: false
 
 - 
@@ -33,7 +33,7 @@
   become: true
   ansible.builtin.command: "zpool list -Ho name {{ zfs_pool_name }}"
   register: result_pool_list
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: false
 
 - 

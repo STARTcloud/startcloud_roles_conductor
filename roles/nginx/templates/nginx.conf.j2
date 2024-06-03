@@ -40,7 +40,11 @@ http {
     keepalive_timeout  {{ nginx_keepalive_timeout }};
     keepalive_requests {{ nginx_keepalive_requests }};
 
-    server_tokens {{ nginx_server_tokens }};
+{% if nginx_server_tokens == "on" or nginx_server_tokens == True %}
+    server_tokens on;
+{% elif nginx_server_tokens == "off" or nginx_server_tokens == False %}
+    server_tokens off;
+{% endif %}
 {% if nginx_proxy_cache_path %}
     proxy_cache_path {{ nginx_proxy_cache_path }};
 {% endif %}

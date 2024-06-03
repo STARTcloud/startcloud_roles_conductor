@@ -1,7 +1,15 @@
 ---
-python_simple_web_server_path: "{{ service_home_dir }}"
-startcloud_quick_start_port_forwards:
-  -
-    guest: 8000
-    url: "demo"
-startcloud_quick_start_proxy_url: "{{ startcloud_quick_start_port_forwards[0].url }}.{{ settings.hostname }}.{{ settings.domain }}"
+elasticsearch_version: '7.x'
+elasticsearch_package: elasticsearch
+elasticsearch_package_state: present
+
+elasticsearch_service_state: started
+elasticsearch_service_enabled: true
+
+elasticsearch_network_host: localhost
+elasticsearch_http_port: 9200
+
+elasticsearch_heap_size_min: 1g
+elasticsearch_heap_size_max: 2g
+
+elasticsearch_extra_options: ''

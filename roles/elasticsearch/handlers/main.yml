@@ -1,4 +1,3 @@
 ---
-- name: restart nginx
-  service: name=nginx state=restarted
-  become: yes
+- name: restart elasticsearch
+  service: name=elasticsearch state=restarted
