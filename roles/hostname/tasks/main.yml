@@ -5,7 +5,18 @@
     name: "{{ settings.hostname }}.{{ settings.domain }}"
 
 -
+  name: "Gathering facts on current container"
+  community.docker.current_container_facts:
+
+-
+  name: "Printing information on current container when running in a container"
+  ansible.builtin.debug:
+    msg: "Container ID is {{ ansible_module_container_id }}"
+  when: ansible_module_running_in_container
+
+-
   name: "Setting /etc/hosts"
+  when: not ansible_module_running_in_container
   ansible.builtin.replace:
     path: "/etc/hosts"
     regexp: "{{ item.regex }}"

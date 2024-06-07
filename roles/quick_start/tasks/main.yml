@@ -9,7 +9,7 @@
     path: "{{ item }}" # Specifies the path for each directory.
     state: directory # Ensures the directory exists.
     mode: '0755' # Sets the directory permissions.
-  with_items: # Directories to be created, interpolated with variables from default/main.yml, and overridden by vars/main.yml, which is overriden by the variables in the playbook.
+  with_items: # Directories to be created, interpolated with variables from default/main.yml
     - "{{ python_simple_web_server_path }}/images"
     - "{{ python_simple_web_server_path }}/ids"
 
@@ -21,6 +21,7 @@
 
 -
   name: "Grabbing External IP address"
+  when: not ansible_module_running_in_container
   ansible.builtin.shell: |
     set -o pipefail
     ip addr show public_adapter | awk '/inet / {print $2}' | cut -d'/' -f1
@@ -28,6 +29,22 @@
     executable: /bin/bash
   register: netoutput
   changed_when: false
+
+-
+  name: "Grabbing External IP address"
+  when: ansible_module_running_in_container
+  ansible.builtin.shell: |
+    set -o pipefail
+    ip a | awk '/inet / {print $2}' | cut -d'/' -f1
+  args:
+    executable: /bin/bash
+  register: netoutput
+  changed_when: false
+
+-
+  name: "Setting Address"
+  ansible.builtin.set_fact:
+    netoutput: "{{ netoutput.stdout }}"
 
 -
   name: "Placing Python Simple HTTP Server Service file" # Copies service configuration files to their respective locations.
@@ -40,9 +57,19 @@
   loop:
     - { src: 'pythonserve.service.j2', dest: '/etc/systemd/system/pythonserve.service', owner: '{{ service_user }}' }
     - { src: 'environment.j2', dest: '/etc/pythonserv', owner: '{{ service_user }}' }
-    - { src: 'index.html.j2', dest: '{{ python_simple_web_server_path }}/welcome.html', owner: '{{ service_user }}' }
     - { src: 'styles.css', dest: '{{ python_simple_web_server_path }}/styles.css', owner: '{{ service_user }}' }
     - { src: 'cockpit.conf.j2', dest: '/etc/cockpit/cockpit.conf', owner: '{{ service_user }}' }
+
+-
+  name: "Placing Python Simple HTTP Server Service file" # Copies service configuration files to their respective locations.
+  become: true # Executes the task with elevated privileges.
+  ansible.builtin.template:
+    owner: "{{ item.owner }}" # Sets the owner of the file.
+    src: "{{ item.src }}" # Specifies the source file.
+    dest: "{{ item.dest }}" # Specifies the destination file.
+    mode: '0644' # Sets the file permissions.
+  loop:
+    - { src: '{{ index }}', dest: '{{ python_simple_web_server_path }}/index.html', owner: '{{ service_user }}' }
 
 -
   name: "Copying Root CA to {{ service_home_dir }}"
@@ -57,7 +84,23 @@
     - "{{ cert_dir }}/ca/ca-certificate.pem"
 
 -
+  name: "Creating Python Simple HTTP Server Shell Script"
+  when: ansible_module_running_in_container
+  ansible.builtin.template:
+    src: "start_pythonserve.sh.j2"
+    dest: "/usr/local/bin/start_pythonserve.sh"
+    mode: '0755'
+
+-
+  name: "Starting Python Simple HTTP Server in Docker"
+  when: ansible_module_running_in_container
+  ansible.builtin.shell: /usr/local/bin/start_pythonserve.sh
+  async: 86400
+  poll: 0
+
+-
   name: "Starting Python Simple HTTP server" # Starts the Python Simple HTTP server service.
+  when: not ansible_module_running_in_container
   ansible.builtin.service:
     name: pythonserve # Specifies the service name.
     state: started # Ensures the service is running.
@@ -73,12 +116,14 @@
 
 -
   name: "Recording Installers" # Records the contents of the /vagrant/installers directory.
+  when: not ansible_module_running_in_container
   ansible.builtin.command: tree -J /vagrant/installers # Executes the tree command to list directory contents.
   register: installers # Stores the output for later use.
   changed_when: false # Indicates that this task does not change the system state.
 
 -
   name: "Writing included installers to /vagrant/support-bundle/installers.json" # Writes the recorded installers to a JSON file.
+  when: not ansible_module_running_in_container
   ansible.builtin.copy:
     content: "{{ installers.stdout_lines }}" # Uses the stored output as the content.
     dest: "/vagrant/support-bundle/installers.json" # Specifies the destination file.
@@ -86,7 +131,7 @@
     mode: 'a+x'  # Appends to the file and sets execute permission.
 
 -
-  name: "Including Domino One Touch autoconfigure to /vagrant/support-bundle/autoconfigure.log" # Copies the Domino One Touch autoconfigure log to the support bundle.
+  name: "Including Domino One Touch autoconfigure to /vagrant/support-bundle/autoconfigure.log" # Copies the Domino One Touch log to the support bundle.
   become: true # Executes the task with elevated privileges.
   when: domino_home_dir is defined # Only runs if the domino_home_dir variable is defined.
   ansible.builtin.copy:
@@ -111,7 +156,7 @@
     mode: 'a+x' # Appends to the file and sets execute permission.
 
 -
-  name: "Checking Python Simple HTTP server is listening on port {{ startcloud_quick_start_port_forwards[0].guest }}" # Checks if the Python Simple HTTP server is listening on a specific port.
+  name: "Checking if Python HTTP server is listening on port {{ startcloud_quick_start_port_forwards[0].guest }}" # Checks if Python HTTP server is listening
   ansible.builtin.wait_for:
     port: "{{ startcloud_quick_start_port_forwards[0].guest }}" # Specifies the port to check.
     delay: 5 # Waits for 5 seconds before checking.
@@ -138,6 +183,7 @@
 
 -
   name: "Restarting Cockpit" # Restarts the Cockpit service.
+  when: not ansible_module_running_in_container
   ansible.builtin.systemd:
     state: restarted # Restarts the service.
     daemon_reload: true # Reloads the systemd manager configuration.
