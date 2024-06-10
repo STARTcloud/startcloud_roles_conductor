@@ -47,7 +47,7 @@ options:
       The certificate subject base (default O=<realm-name>).
       RDNs are in LDAP order (most specific RDN first).
     type: str
-    required: yes
+    required: true
   enable_compat:
     description: Enable support for trusted domains for old clients
     type: bool
@@ -65,31 +65,31 @@ options:
   adtrust_netbios_name:
     description: The adtrust netbios_name setting
     type: str
-    required: yes
+    required: true
   adtrust_reset_netbios_name:
     description: The adtrust reset_netbios_name setting
     type: bool
-    required: yes
+    required: true
   ccache:
     description: The local ccache
     type: str
-    required: yes
+    required: true
   _top_dir:
     description: The installer _top_dir setting
     type: str
-    required: yes
+    required: true
   setup_ca:
     description: Configure a dogtag CA
     type: bool
-    required: yes
+    required: true
   setup_adtrust:
     description: Configure AD trust capability
     type: bool
-    required: yes
+    required: true
   config_master_host_name:
     description: The config master_host_name setting
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

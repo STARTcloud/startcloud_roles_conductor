@@ -124,7 +124,7 @@
   ansible.posix.synchronize:
     dest: "{{ item.dest }}"
     src: "{{ item.path }}"
-    recursive: yes
+    recursive: true
   with_items:
     -
       path: "{{ client_path }}/usr/bin/"
@@ -144,7 +144,7 @@
   ansible.posix.synchronize:
     dest: "{{ item.dest }}"
     src: "{{ item.path }}"
-    recursive: yes
+    recursive: true
   with_items:
     -
       path: "{{ pcoip_path }}/usr/lib/vmware/view/client/"
@@ -158,7 +158,7 @@
   ansible.posix.synchronize:
     dest: "{{ item.dest }}"
     src: "{{ item.path }}"
-    recursive: yes
+    recursive: true
   with_items:
     -
       path: "{{ usb_path }}/bin/"
@@ -231,7 +231,7 @@
   ansible.builtin.service:
     name: vmware-USBArbitrator
     state: started
-    enabled: yes
+    enabled: true
 
 -
   name: "Deleting Leftovers"

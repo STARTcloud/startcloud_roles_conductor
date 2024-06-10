@@ -41,23 +41,23 @@ options:
     description: Fully qualified name of IPA servers to enroll to
     type: list
     elements: str
-    required: yes
+    required: true
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   basedn:
     description: The basedn of the IPA server (of the form dc=example,dc=com)
     type: str
-    required: yes
+    required: true
   principal:
     description:
       User Principal allowed to promote replicas and join IPA realm
@@ -68,11 +68,11 @@ options:
       The certificate subject base (default O=<realm-name>).
       RDNs are in LDAP order (most specific RDN first).
     type: str
-    required: yes
+    required: true
   ca_enabled:
     description: Whether the Certificate Authority is enabled or not
     type: bool
-    required: yes
+    required: true
   mkhomedir:
     description: Create home directories for users on their first login
     type: bool
@@ -150,7 +150,7 @@ options:
   nosssd_files:
     description: >
       The dist of nss_ldap or nss-pam-ldapd files if sssd is disabled
-    required: yes
+    required: true
     type: dict
   selinux_works:
     description: True if selinux status check passed
@@ -159,7 +159,7 @@ options:
   krb_name:
     description: The krb5 config file name
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''
@@ -174,7 +174,7 @@ EXAMPLES = '''
     hostname: client1.example.com
     subject_base: O=EXAMPLE.COM
     principal: admin
-    ca_enabled: yes
+    ca_enabled: true
     krb_name: /tmp/tmpkrb5.conf
 '''
 

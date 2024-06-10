@@ -40,7 +40,7 @@ options:
   dm_password:
     description: Directory Manager password
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

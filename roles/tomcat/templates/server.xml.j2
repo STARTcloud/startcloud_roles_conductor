@@ -79,7 +79,7 @@
          Either JSSE or OpenSSL style configuration may be used regardless of
          the SSLImplementation selected. JSSE style configuration is used below.
     -->
-
+      {% if tomcat_version < 10 %}
         {% if selfsigned_enabled %}
            <Connector port="{{ startcloud_tomcat_port_forwards[1].guest }}" protocol="HTTP/1.1" SSLEnabled="true" maxThreads="150" scheme="https" secure="true"
                 clientAuth="false" sslProtocol="TLS"
@@ -91,6 +91,47 @@
                 keystoreFile="{{ cert_dir }}/jks/default-signed.jks" keystorePass="{{ cert_pass }}"
                 URIEncoding="UTF-8" />"
         {% endif %}
+      {% else %}
+        {% if selfsigned_enabled %}
+          <Connector port="{{ startcloud_tomcat_port_forwards[1].guest }}"
+                protocol="org.apache.coyote.http11.Http11NioProtocol"
+                maxThreads="100"
+                compression="on"
+                scheme="https"
+                SSLEnabled="true"
+                secure="true"
+                clientAuth="false"
+                sslProtocol="TLS"
+                defaultSSLHostConfigName="tomcat.{{ settings.hostname }}.{{ settings.domain }}"
+                URIEncoding="UTF-8">
+            <SSLHostConfig hostName="tomcat.{{ settings.hostname }}.{{ settings.domain }}" protocols="TLSv1.2">
+                <Certificate 
+                     certificateFile="{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt"
+                     certificateKeyFile="{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+                     certificateChainFile="{{ cert_dir }}/ca/ca-certificate.pem" />
+            </SSLHostConfig>
+          </Connector>
+        {% else %}
+           <Connector port="{{ startcloud_tomcat_port_forwards[1].guest }}" 
+                protocol="org.apache.coyote.http11.Http11NioProtocol"
+                maxThreads="100"
+                compression="on"
+                scheme="https"
+                SSLEnabled="true"
+                secure="true"
+                clientAuth="false"
+                sslProtocol="TLS"
+                defaultSSLHostConfigName="tomcat.{{ settings.hostname }}.{{ settings.domain }}"
+                URIEncoding="UTF-8">
+            <SSLHostConfig hostName="tomcat.{{ settings.hostname }}.{{ settings.domain }}" protocols="TLSv1.2">
+                <Certificate 
+                     certificateFile="{{ cert_dir }}/crt/default-signed.crt"
+                     certificateKeyFile="{{ cert_dir }}/key/default-signed.key"
+                     certificateChainFile="{{ cert_dir }}/ca/default-signed.ca" />
+            </SSLHostConfig>
+          </Connector>
+        {% endif %}
+      {% endif %}
 		<!-- Define an SSL/TLS HTTP/1.1 Connector on port 8443 with HTTP/2
          This connector uses the APR/native implementation which always uses
          OpenSSL for TLS.

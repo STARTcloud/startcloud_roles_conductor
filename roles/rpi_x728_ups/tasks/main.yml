@@ -46,6 +46,6 @@
     line: "{{ item.line }}"
     path:  /etc/modules
     state: present
-    create: yes
+    create: true
   with_items:
     - line: 'rtc-ds1307'

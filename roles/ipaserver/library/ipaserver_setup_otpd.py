@@ -40,7 +40,7 @@ options:
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str

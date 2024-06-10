@@ -45,11 +45,11 @@ options:
   dm_password:
     description: Directory Manager password
     type: str
-    required: yes
+    required: true
   password:
     description: Admin user kerberos password
     type: str
-    required: yes
+    required: true
   ip_addresses:
     description: List of Master Server IP Addresses
     type: list
@@ -58,11 +58,11 @@ options:
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str

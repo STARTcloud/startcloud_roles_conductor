@@ -10,7 +10,7 @@
     name: telegraf
     group: telegraf
     state: present
-  become: yes
+  become: true
 
 - name: "Suse | Install repo dependencies"
   zypper:
@@ -19,7 +19,7 @@
     state: present
   register: are_telegraf_dependencies_packages_installed
   until: are_telegraf_dependencies_packages_installed is succeeded
-  become: yes
+  become: true
 
 - name: "Suse | Install basic repo file"
   zypper_repository:
@@ -28,7 +28,7 @@
     state: present
     runrefresh: True
     auto_import_keys: True
-  become: yes
+  become: true
 
 - name: "Suse | Install Telegraf"
   zypper:
@@ -36,7 +36,7 @@
     state: "{{ telegraf_agent_package_state }}"
   register: is_telegraf_package_installed
   until: is_telegraf_package_installed is succeeded
-  become: yes
+  become: true
 
 - name: "Suse | Create directories for telegraf"
   file:

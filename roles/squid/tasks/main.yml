@@ -31,3 +31,40 @@
       ansible.builtin.apt:
         name: "{{ packages }}"
         state: present
+
+-
+  name: Remove default Dante configuration
+  ansible.builtin.file:
+    path: /etc/squid/squid.conf
+    state: absent
+
+-
+  name: Create new Squid configuration
+  ansible.builtin.template:
+    dest: /etc/squid/squid.conf
+    src: squid.conf.j2
+
+-
+  name: "Runing squid -k parse"
+  ansible.builtin.command: squid -k parse
+  register: squid_parse_result
+  ignore_errors: true
+
+-
+  name: "Failing if squid configuration is invalid"
+  ansible.builtin.fail:
+    msg: "Squid configuration is invalid."
+  when: squid_parse_result.rc != 0
+
+-
+  name: "Checking if Squid Config is Valid"
+  ansible.builtin.debug:
+    msg: "Squid configuration is valid."
+  when: squid_parse_result.rc == 0
+
+-
+  name: Restart Squid service
+  ansible.builtin.systemd:
+    name: squid
+    state: restarted
+    enabled: true

@@ -44,23 +44,23 @@ options:
     description: Fully qualified name of IPA servers to enroll to
     type: list
     elements: str
-    required: yes
+    required: true
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   kdc:
     description: The name or address of the host running the KDC
     type: str
-    required: yes
+    required: true
   on_master:
     description: Whether the configuration is done on the master or not
     type: bool

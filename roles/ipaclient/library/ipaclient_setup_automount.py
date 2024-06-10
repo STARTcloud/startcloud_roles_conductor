@@ -42,7 +42,7 @@ options:
     description: Fully qualified name of IPA servers to enroll to
     type: list
     elements: str
-    required: yes
+    required: true
   sssd:
     description: The installer sssd setting
     type: bool

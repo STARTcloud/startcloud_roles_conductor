@@ -33,7 +33,7 @@
 
 - name: Copy server backup files to controller
   ansible.builtin.fetch:
-    flat: yes
+    flat: true
     src: "{{ ipabackup_dir }}/{{ ipabackup_item }}/{{ item }}"
     dest: "{{ __derived_controller_dir }}"
   with_items:
@@ -43,6 +43,6 @@
   ansible.builtin.file:
     dest: "{{ __derived_controller_dir }}"
     mode: u=rwX,go=
-    recurse: yes
+    recurse: true
   delegate_to: localhost
   become: no

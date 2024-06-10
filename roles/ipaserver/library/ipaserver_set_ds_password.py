@@ -40,35 +40,35 @@ options:
   dm_password:
     description: Directory Manager password
     type: str
-    required: yes
+    required: true
   password:
     description: Admin user kerberos password
     type: str
-    required: yes
+    required: true
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   setup_ca:
     description: Configure a dogtag CA
     type: bool
-    required: yes
+    required: true
   idstart:
     description: The starting value for the IDs range (default random)
     type: int
-    required: yes
+    required: true
   idmax:
     description: The max value for the IDs range (default idstart+199999)
     type: int
-    required: yes
+    required: true
   no_hbac_allow:
     description: Don't install allow_all HBAC rule
     type: bool

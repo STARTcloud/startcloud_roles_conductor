@@ -41,24 +41,24 @@ options:
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   servers:
     description: Fully qualified name of IPA servers to enroll to
     type: list
     elements: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   basedn:
     description: The basedn of the IPA server (of the form dc=example,dc=com)
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

@@ -40,25 +40,25 @@ options:
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   subject_base:
     description: |
       The certificate subject base (default O=<realm-name>).
       RDNs are in LDAP order (most specific RDN first).
     type: str
-    required: yes
+    required: true
   ca_enabled:
     description: Whether the Certificate Authority is enabled or not
     type: bool
-    required: yes
+    required: true
   request_cert:
     description: Request certificate for the machine
     type: bool
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

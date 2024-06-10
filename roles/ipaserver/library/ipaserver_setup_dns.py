@@ -45,23 +45,23 @@ options:
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   setup_dns:
     description: Configure bind with our zone
     type: bool
-    required: yes
+    required: true
   setup_ca:
     description: Configure a dogtag CA
     type: bool
-    required: yes
+    required: true
   zonemgr:
     description: DNS zone manager e-mail address. Defaults to hostmaster@DOMAIN
     type: str
@@ -70,7 +70,7 @@ options:
     description: Add DNS forwarders
     type: list
     elements: str
-    required: yes
+    required: true
   forward_policy:
     description: DNS forwarding policy for global forwarders
     type: str
@@ -86,12 +86,12 @@ options:
     description: The dns ip_addresses setting
     type: list
     elements: str
-    required: yes
+    required: true
   dns_reverse_zones:
     description: The dns reverse_zones setting
     type: list
     elements: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

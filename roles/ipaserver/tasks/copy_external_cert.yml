@@ -12,7 +12,7 @@
       src: "{{ item }}"
       dest: "/root/{{ __item_basename }}"
       mode: preserve
-      force: yes
+      force: true
   - name: Install - Extend ipaserver_external_cert_files with "/root/{{ __item_basename }}"
     ansible.builtin.set_fact:
       ipaserver_external_cert_files: "{{ ipaserver_external_cert_files + ['/root/' + (__item_basename)] }}"

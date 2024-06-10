@@ -159,7 +159,7 @@
   name: "Enabling xrdp"
   ansible.builtin.service:
     name: xrdp
-    enabled: yes
+    enabled: true
     state: stopped
     daemon_reload: true
 
@@ -167,7 +167,7 @@
   name: "Enabling xrdp-sesman"
   ansible.builtin.service:
     name: xrdp-sesman
-    enabled: yes
+    enabled: true
     state: stopped
     daemon_reload: true
 
@@ -188,3 +188,11 @@
     job: "sleep 30 && sudo service xrdp restart"
     name: "Restart xRDP on reboot"
     special_time: reboot
+
+-
+  name: "Enabling xrdp"
+  ansible.builtin.service:
+    name: xrdp
+    enabled: true
+    state: restarted
+    daemon_reload: true

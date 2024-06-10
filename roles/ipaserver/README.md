@@ -140,7 +140,7 @@ Server installation step 1: Generate CSR, copy to controller as `<ipaserver host
     fetch:
       src: /root/ipa.csr
       dest: "{{ groups.ipaserver[0] + '-ipa.csr' }}"
-      flat: yes
+      flat: true
 ```
 
 Sign with CA: This is up to you
@@ -160,7 +160,7 @@ Server installation step 2: Copy `<ipaserver hostname>-chain.crt` to the IPA ser
     copy:
       src: "{{ groups.ipaserver[0] + '-chain.crt' }}"
       dest: "/root/chain.crt"
-      force: yes
+      force: true
 
   roles:
   - role: ipaserver

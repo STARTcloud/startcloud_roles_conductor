@@ -55,15 +55,15 @@ options:
       The certificate subject base (default O=<realm-name>).
       RDNs are in LDAP order (most specific RDN first).
     type: str
-    required: yes
+    required: true
   config_master_host_name:
     description: The config master_host_name setting
     type: str
-    required: yes
+    required: true
   ccache:
     description: The local ccache
     type: str
-    required: yes
+    required: true
   _ca_enabled:
     description: The installer _ca_enabled setting
     type: bool
@@ -80,11 +80,11 @@ options:
   _top_dir:
     description: The installer _top_dir setting
     type: str
-    required: yes
+    required: true
   dirman_password:
     description: Directory Manager (master) password
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

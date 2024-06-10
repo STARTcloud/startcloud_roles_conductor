@@ -69,7 +69,7 @@ options:
     description:
       User Principal allowed to promote replicas and join IPA realm
     type: str
-    required: yes
+    required: true
   ca_cert_files:
     description:
       List of files containing CA certificates for the service certificate
@@ -240,7 +240,7 @@ options:
   server:
     description: Fully qualified name of IPA server to enroll to
     type: str
-    required: yes
+    required: true
   skip_conncheck:
     description: Skip connection check to remote master
     type: bool

@@ -40,7 +40,7 @@ options:
   backup:
     description: File to backup
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

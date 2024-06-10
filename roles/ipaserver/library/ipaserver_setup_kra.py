@@ -40,23 +40,23 @@ options:
   dm_password:
     description: Directory Manager password
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   setup_ca:
     description: Configure a dogtag CA
     type: bool
-    required: yes
+    required: true
   setup_kra:
     description: Configure a dogtag KRA
     type: bool
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   pki_config_override:
     description: Path to ini file with config overrides
     type: str

@@ -62,9 +62,9 @@
   ansible.builtin.git:
     repo: "{{ pkg_server.repo_url }}"
     dest: "/{{ storage_disk.path }}/src"
-    clone: yes
-    update: yes
-    force: yes
+    clone: true
+    update: true
+    force: true
     accept_hostkey: yes
 
 -
@@ -94,7 +94,7 @@
   ansible.builtin.service: 
     name: "pkg/server:{{ pkg_server.omnios_release }}_{{ pkg_server.archive | replace('.','') }}"
     state: stopped
-    enabled: no
+    enabled: false
 
 -
   name: "Starting pkg server"
@@ -102,7 +102,7 @@
   ansible.builtin.service: 
     name: "pkg/server:{{ pkg_server.omnios_release }}_{{ pkg_server.archive | replace('.','') }}"
     state: started
-    enabled: yes
+    enabled: true
 
 -
   name: "Configuring PGKSRVR Variable"
@@ -111,7 +111,7 @@
     path: "/{{ storage_disk.path }}/src/lib/site.sh"
     regexp: '^(.*)PKGSRVR=(.*)$' 
     line: 'PKGSRVR=http://localhost:{{ pkg_server.port }}/'
-    backrefs: yes
+    backrefs: true
 
 -
   name: "Configuring IPS_REPO Variable"
@@ -120,7 +120,7 @@
     path: "/{{ storage_disk.path }}/src/lib/site.sh"
     regexp: '^(.*)IPS_REPO=(.*)$' 
     line: 'IPS_REPO=http://localhost:{{ pkg_server.port }}/'
-    backrefs: yes
+    backrefs: true
 
 - 
   name: "Expecting input for rebuild"

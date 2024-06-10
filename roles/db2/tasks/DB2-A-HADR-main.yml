@@ -2,19 +2,19 @@
   name: Enabling HAProxy Statitics Port
   firewalld:
     port: 444/tcp
-    permanent: yes
+    permanent: true
     state: enabled
 -
   name: "Enabling HAProxy DB2 Backend on Port {{ db2_hadr_backend_ports }}"
   firewalld:
     port: "{{ db2_hadr_backend_ports }}/tcp"
-    permanent: yes
+    permanent: true
     state: enabled
 -
   name: "Enabling HAProxy DB2 Front on Port {{ db2_haproxy_frontend_ports }}"
   firewalld:
     port: "{{  db2_haproxy_frontend_ports }}/tcp"
-    permanent: yes
+    permanent: true
     state: enabled
 - 
   name: "Forcing DB2 Server Off"

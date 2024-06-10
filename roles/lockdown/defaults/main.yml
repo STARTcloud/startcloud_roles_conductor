@@ -1,5 +1,6 @@
 ---
 show_help: true
+lockdown_user_private_key_path: /home/startcloud/.ssh/id_ssh_rsa
 lockdown:
   - exim4
   #  - cockpit.socket

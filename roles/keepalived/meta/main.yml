@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: startcloud_keepalived
+  role_name: keepalived
   author: MarkProminic
   description: Setup a reverse proxy to aggregate roles and provide centralized SSL management
   company: STARTCloud

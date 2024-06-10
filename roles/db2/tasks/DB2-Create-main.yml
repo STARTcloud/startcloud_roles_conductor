@@ -9,7 +9,7 @@
 - 
   name: "Creating DB2 Database: {{ db2dbname }}"
   raw: "su - {{ db2usr }} -c 'db2 create database {{ db2dbname }} on /local/{{database_dir}}'"
-  ignore_errors: yes
+  ignore_errors: true
 - 
   name: Creating Archive Log Folder /local-log/archive-logs
   file:

@@ -31,4 +31,4 @@
   service:
     name: mongodb-mms-monitoring-agent
     state: started
-    enabled: yes
+    enabled: true

@@ -4,13 +4,13 @@
   dnf:
     name: "*"
     state: latest
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
 
 - name: Restart PGSQL
   systemd:
     name: postgresql
     state: restarted
-  become: yes
+  become: true
 
   

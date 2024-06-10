@@ -37,5 +37,5 @@
   ansible.builtin.service:
     name: postfix
     state: stopped
-    enabled: no
+    enabled: false
 

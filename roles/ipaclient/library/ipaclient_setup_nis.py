@@ -41,7 +41,7 @@ options:
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   nisdomain:
     description: The NIS domain name
     type: str

@@ -60,28 +60,28 @@
     mode: 0751
     owner:  "{{ user }}"
     path: /var/cache/jenkins
-    recurse: yes
+    recurse: true
   name: "Preparing Jenkins Cache folder permissions for user setup"
 - 
   file: 
     group: "{{ group }}"
     owner:  "{{ user }}"
     path: /var/lib/jenkins
-    recurse: yes
+    recurse: true
   name: "Preparing Jenkins Library folder permissions for user setup"
 - 
   file: 
     group: "{{ group }}"
     owner:  "{{ user }}"
     path: /var/run/jenkins
-    recurse: yes
+    recurse: true
   name: "Preparing Jenkins run folder permissions for user setup"
 - 
   file: 
     group: "{{ group }}"
     owner:  "{{ user }}"
     path: /var/log/jenkins
-    recurse: yes
+    recurse: true
   name: "Preparing Jenkins log folder permissions for user setup"
 - 
   lineinfile: 
@@ -123,7 +123,7 @@
   copy: 
     dest: /var/lib/jenkins/config.xml.orig
     src: /var/lib/jenkins/config.xml
-    remote_src: yes
+    remote_src: true
   name: "Backing up Config.XML to Config.XML.orig"
   
 - 
@@ -232,7 +232,7 @@
     group: "{{ group }}"
     owner:  "{{ user }}"
     path: /home/"{{ user }}"
-    recurse: yes
+    recurse: true
   name: "Setting {{ user }} permissions"
 - 
   name: Removing Groovy Startup Bypass
@@ -267,6 +267,6 @@
     dest: "{{item.dest}}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    remote_src: yes
+    remote_src: true
   with_items:
     - { src: /vagrant/jobs , dest: "/home/{{user}}/Desktop" }

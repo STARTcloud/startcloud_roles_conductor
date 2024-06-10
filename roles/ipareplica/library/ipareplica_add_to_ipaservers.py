@@ -41,23 +41,23 @@ options:
   setup_kra:
     description: Configure a dogtag KRA
     type: bool
-    required: yes
+    required: true
   config_master_host_name:
     description: The config master_host_name setting
     type: str
-    required: yes
+    required: true
   ccache:
     description: The local ccache
     type: str
-    required: yes
+    required: true
   installer_ccache:
     description: The installer ccache setting
     type: str
-    required: yes
+    required: true
   _top_dir:
     description: The installer _top_dir setting
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

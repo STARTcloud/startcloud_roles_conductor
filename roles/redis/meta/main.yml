@@ -1,7 +1,7 @@
 galaxy_info:
-  role_name: influxdb
+  role_name: redis
   author: MarkProminic
-  description: Installs and Configures influxdb
+  description: Installs and Configures redis
   company: STARTCloud
   # issue_tracker_url: http://example.com/issue/tracker
   license: license (Apache)

@@ -41,7 +41,7 @@ options:
   domain:
     description: Primary DNS domain of the IPA deployment
     type: str
-    required: yes
+    required: true
   firefox_dir:
     description:
       Specify directory where Firefox is installed (for example

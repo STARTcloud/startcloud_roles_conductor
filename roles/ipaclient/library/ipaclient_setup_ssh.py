@@ -42,7 +42,7 @@ options:
     description: Fully qualified name of IPA servers to enroll to
     type: list
     elements: str
-    required: yes
+    required: true
   no_ssh:
     description: Do not configure OpenSSH client
     type: bool

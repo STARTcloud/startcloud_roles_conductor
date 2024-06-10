@@ -22,7 +22,7 @@
     mode: "0777"
     owner: haproxy
     path: /etc/haproxy/
-    recurse: yes
+    recurse: true
   name: "Change file ownership, group and permissions"
 - 
   name: "Configuring haproxy"

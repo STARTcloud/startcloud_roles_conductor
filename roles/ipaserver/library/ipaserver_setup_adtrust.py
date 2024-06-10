@@ -68,11 +68,11 @@ options:
   adtrust_netbios_name:
     description: The adtrust netbios_name setting
     type: str
-    required: yes
+    required: true
   adtrust_reset_netbios_name:
     description: The adtrust reset_netbios_name setting
     type: bool
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

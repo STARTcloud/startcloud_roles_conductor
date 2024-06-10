@@ -45,19 +45,19 @@ options:
     description: Fully qualified name of IPA servers to enroll to
     type: list
     elements: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
   basedn:
     description: The basedn of the IPA server (of the form dc=example,dc=com)
     type: str
-    required: yes
+    required: true
   principal:
     description:
       User Principal allowed to promote replicas and join IPA realm
@@ -97,7 +97,7 @@ options:
   krb_name:
     description: The krb5 config file name
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

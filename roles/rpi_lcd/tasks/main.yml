@@ -44,7 +44,7 @@
   name: "Enabling LCD-Display Service"
   ansible.builtin.service:
     name: lcd-display
-    enabled: yes
+    enabled: true
     state: stopped
     daemon_reload: true
 
@@ -55,6 +55,6 @@
     line: "{{ item.line }}"
     path:  /etc/modules
     state: present
-    create: yes
+    create: true
   with_items:
     - line: 'i2c-dev'

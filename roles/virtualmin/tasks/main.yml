@@ -6,13 +6,13 @@
     - libnet-ssleay-perl
     - ufw
     state: absent
-    force_apt_get: yes
+    force_apt_get: true
 
 - name: "Checking if Virtualmin has been installed and configured"
   lineinfile: 
     dest: /etc/webmin/virtual-server/config
     line: "wizard_run=1"
-  check_mode: yes
+  check_mode: true
   register: virtualmin
   failed_when: virtualmin.changed
 
@@ -115,7 +115,7 @@
     - lsb-release
     - curl
     state: present
-    force_apt_get: yes
+    force_apt_get: true
 
 - 
   name: "Downloading GPG keys"
@@ -139,5 +139,5 @@
     - php7.2-{cgi,cli,fpm,pdo,gd,mbstring,mysqlnd,opcache,curl,xml,zip}
     - php7.4-{cgi,cli,fpm,pdo,gd,mbstring,mysqlnd,opcache,curl,xml,zip}
     state: present
-    force_apt_get: yes
+    force_apt_get: true
 

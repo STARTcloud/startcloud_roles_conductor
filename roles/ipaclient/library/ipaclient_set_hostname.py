@@ -41,7 +41,7 @@ options:
   hostname:
     description: Fully qualified name of this host
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

@@ -20,4 +20,4 @@
     src: conky.conf.j2
     dest: /etc/conky/conky.conf
     mode: "0644"
-    force: yes
+    force: true

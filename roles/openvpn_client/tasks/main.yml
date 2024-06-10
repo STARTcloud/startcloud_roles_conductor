@@ -23,7 +23,7 @@
     src: /etc/openvpn/easy-rsa/pki/{{ item }}
     dest: /etc/openvpn/client/{{ item | basename }}
     mode: "0640"
-    remote_src: yes
+    remote_src: true
   loop:
     - ca.crt
     - issued/client.crt
@@ -35,4 +35,4 @@
   when: "ansible_os_family == 'Debian'"
   service:
     name: openvpn
-    enabled: yes
+    enabled: true

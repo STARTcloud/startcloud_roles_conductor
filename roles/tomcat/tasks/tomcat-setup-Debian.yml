@@ -9,36 +9,37 @@
     - "/etc/tomcat{{ tomcat_version }}/webapps/host-manager/META-INF"
     - "/etc/tomcat{{ tomcat_version }}/webapps/manager/META-INF"
 
--
-  name: "Creating a keystore for the self-signed certificate/private key pair"
-  when: selfsigned_enabled
-  become_user: "{{ service_user }}"
-  community.general.java_keystore:
-    name: "{{ settings.hostname }}.{{ settings.domain }}"
-    certificate: "{{ lookup('file', '{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt') }}"
-    private_key: "{{ lookup('file', '{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key') }}"
-    password: "{{ cert_pass }}"
-    owner: "{{ service_user }}"
-    mode: '0777'
-    dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-self-signed.jks"
-  environment:
-    PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+# These have been moved to the startcloud_ssl role, so that users can import their own keys
+#- 
+#  name: "Creating a keystore for the self-signed certificate/private key pair"
+#  when: selfsigned_enabled
+#  become_user: "{{ service_user }}"
+#  community.general.java_keystore:
+#    name: "{{ settings.hostname }}.{{ settings.domain }}"
+#    certificate: "{{ lookup('file', '{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt') }}"
+#    private_key: "{{ lookup('file', '{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key') }}"
+#    password: "{{ cert_pass }}"
+#    owner: "{{ service_user }}"
+#    mode: '0777'
+#    dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-self-signed.jks"
+#  environment:
+#    PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
 
--
-  name: "Creating a keystore for the given certificate/private key pair"
-  when: not selfsigned_enabled
-  become: true
-  become_user: "{{ service_user }}"
-  community.general.java_keystore:
-    name: "{{ settings.hostname }}.{{ settings.domain }}"
-    certificate: "{{ lookup('file', '{{ cert_dir }}/crt/default-signed.crt') }}"
-    private_key: "{{ lookup('file', '{{ cert_dir }}/key/default-signed.key') }}"
-    password: "{{ cert_pass }}"
-    owner: "{{ service_user }}"
-    mode: '0777'
-    dest: "{{ cert_dir }}/jks/default-signed.jks"
-  environment:
-    PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+#-
+#  name: "Creating a keystore for the given certificate/private key pair"
+#  when: not selfsigned_enabled
+#  become: true
+#  become_user: "{{ service_user }}"
+#  community.general.java_keystore:
+#    name: "{{ settings.hostname }}.{{ settings.domain }}"
+#    certificate: "{{ lookup('file', '{{ cert_dir }}/crt/default-signed.crt') }}"
+#    private_key: "{{ lookup('file', '{{ cert_dir }}/key/default-signed.key') }}"
+#    password: "{{ cert_pass }}"
+#    owner: "{{ service_user }}"
+#    mode: '0777'
+#    dest: "{{ cert_dir }}/jks/default-signed.jks"
+#  environment:
+#    PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
 
 -
   name: "Adding group for user {{ tomcat_user }}"
@@ -55,6 +56,26 @@
     system: true
 
 -
+  name: "Example Pre Roles Ad-Hoc Task"
+  ansible.builtin.debug:
+    var: tomcat_version
+
+-
+  name: "Adding Debian 11 Repos"
+  when: tomcat_version is version('10', '<')
+  block:
+    -
+      name: "Adding Debian Bullseye repository"
+      ansible.builtin.apt_repository:
+        repo: "deb http://deb.debian.org/debian/ bullseye main"
+        state: present
+
+    -
+      name: "Updating apt cache"
+      ansible.builtin.apt:
+        update_cache: yes
+
+-
   name: "Installing Tomcat {{ tomcat_version }}"
   ansible.builtin.apt:
     name:
@@ -62,6 +83,22 @@
       - "tomcat{{ tomcat_version }}-admin"
       - "tomcat{{ tomcat_version }}-common"
       - "tomcat{{ tomcat_version }}-user"
+    state: present
+
+-
+  name: "Removing Debian 11 Repos"
+  when: tomcat_version is version('10', '<')
+  block:
+    -
+      name: "Removing Debian Bullseye repository"
+      ansible.builtin.apt_repository:
+        repo: "deb http://deb.debian.org/debian/ bullseye main"
+        state: absent
+
+    -
+      name: "Updating apt cache"
+      ansible.builtin.apt:
+        update_cache: yes
 
 -
   name: "Starting and Enabling Tomcat {{ tomcat_version }}"
@@ -88,6 +125,21 @@
   with_items:
     - "/etc/tomcat{{ tomcat_version }}/context.xml"
   notify: "Restart tomcat"
+
+-
+  name: "Waiting for Tomcat to finish starting for the first time"
+  ansible.builtin.wait_for:
+    path: "/etc/tomcat{{ tomcat_version }}/server.xml"
+
+-
+  name: "Grabbing External IP address"
+  ansible.builtin.shell: |
+    set -o pipefail
+    ip addr show public_adapter | awk '/inet / {print $2}' | cut -d'/' -f1
+  args:
+    executable: /bin/bash
+  register: netoutput
+  changed_when: false
 
 -
   name: "Configuring Tomcat {{ tomcat_version }}"

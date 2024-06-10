@@ -36,7 +36,7 @@
   make:
     chdir: /src/nfc-daemon
     target: install
-  become: yes
+  become: true
 
 -
   name: "Setting NFC-Daemon to start at boot"
@@ -62,6 +62,6 @@
   name: "Enabling nfc-daemon at boot"
   ansible.builtin.service:
     name: nfc-daemon
-    enabled: yes
+    enabled: true
     state: stopped
     daemon_reload: true

@@ -38,7 +38,7 @@
       group: "{{ mattermost_group }}"
       shell: "/usr/sbin/nologin"
       home: "/nonexistent"
-      system: yes
+      system: true
   - name: create mattermost data dir
     ansible.builtin.file:
       path: "{{ mattermost_root_dir }}/data"
@@ -49,13 +49,13 @@
       owner: "{{ mattermost_user }}"
       group: "{{ mattermost_group }}"
       state: directory
-      recurse: yes
+      recurse: true
   - name: setup mattermost dir permissions
     ansible.builtin.file:
       path: "{{ mattermost_root_dir }}"
       state: directory
       mode: g+w
-      recurse: yes
+      recurse: true
   - name: setup mattermost config database DriverName
     ansible.builtin.replace:
       path: "{{ mattermost_root_dir }}/config/config.json"

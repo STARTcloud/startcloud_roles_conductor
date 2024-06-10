@@ -36,5 +36,5 @@
       name: "Enabling and start Avahi daemon"
       systemd:
         name: avahi-daemon
-        enabled: yes
+        enabled: true
         state: started

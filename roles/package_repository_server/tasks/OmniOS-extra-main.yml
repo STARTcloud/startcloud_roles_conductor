@@ -5,7 +5,7 @@
   ansible.builtin.service: 
     name: "pkg/server:{{ pkg_server.omnios_release }}_{{ pkg_server.archive }}"
     state: stopped
-    enabled: no
+    enabled: false
 
 -
   name: "Downloading packages from source"
@@ -23,4 +23,4 @@
   ansible.builtin.service: 
     name: "pkg/server:{{ pkg_server.omnios_release }}_{{ pkg_server.archive }}"
     state: started
-    enabled: yes
+    enabled: true

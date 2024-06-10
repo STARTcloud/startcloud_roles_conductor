@@ -71,18 +71,18 @@
   block:
     - name: Initialize PGSQL
       command: /usr/bin/postgresql-setup initdb
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Enable and Start DB
       systemd:
         name: postgresql
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Create GVM Database
       postgresql_db:
         name: "{{ db_name }}"
-      become: yes
+      become: true
       become_user: postgres
       no_log: true
 
@@ -94,7 +94,7 @@
         encrypted: yes
         priv: ALL
         state: present
-      become: yes
+      become: true
       become_user: postgres
       no_log: true
 
@@ -104,14 +104,14 @@
         new_owner: "{{ gvmuser }}"
         obj_name: "{{ db_name }}"
         obj_type: database
-      become: yes
+      become: true
       become_user: postgres
 
     - name: Reduce Mattermost DB Privleges
       postgresql_user:
         name: "{{ gvmuser }}"
         role_attr_flags: NOCREATEDB
-      become: yes
+      become: true
       become_user: postgres
 
     - name: Add Extensions
@@ -149,7 +149,7 @@
 - name: Change Owner of GVM Directory
   file:
     path: /opt/gvm
-    recurse: yes
+    recurse: true
     owner: gvm
     group: gvm
 
@@ -161,5 +161,5 @@
 - name: Clone GVMd
   git:
     repo: https://github.com/greenbone/gvmd.git
-    clone: yes
+    clone: true
     dest: /opt/gvm

@@ -212,7 +212,7 @@
     path: /var/www/bigbluebutton/client/conf/config.xml
     regexp: '<bwMon server="[^"]*"'
     replace: '<bwMon server="{{ server_ip }}"'
-    backup: yes
+    backup: true
   tags:
     - update_bwmon_ip
 

@@ -157,7 +157,7 @@
       when: ipaadmin_keytab is defined
 
     - name: Install - Get One-Time Password for client enrollment
-      no_log: yes
+      no_log: true
       ipaclient_get_otp:
         ipaadmin_principal: "{{ ipaadmin_principal | default(omit) }}"
         ipaadmin_password: "{{ ipaadmin_password | default(omit) }}"
@@ -167,7 +167,7 @@
       delegate_to: "{{ result_ipaclient_test.servers[0] }}"
 
     - name: Install - Store the previously obtained OTP
-      no_log: yes
+      no_log: true
       ansible.builtin.set_fact:
         ipaadmin_orig_password: "{{ ipaadmin_password | default(omit) }}"
         ipaadmin_password: "{{ result_ipaclient_get_otp.host.randompassword
@@ -177,7 +177,7 @@
       ansible.builtin.debug:
         msg: "{{ result_ipaclient_get_otp.msg }}"
       when: result_ipaclient_get_otp is failed
-      failed_when: yes
+      failed_when: true
 
     always:
     - name: Install - Remove keytab temporary file
@@ -188,7 +188,7 @@
       when: keytab_temp.path is defined
 
   - name: Store predefined OTP in admin_password
-    no_log: yes
+    no_log: true
     ansible.builtin.set_fact:
       ipaadmin_orig_password: "{{ ipaadmin_password | default(omit) }}"
       ipaadmin_password: "{{ ipaclient_otp }}"
@@ -337,7 +337,7 @@
         servers: "{{ result_ipaclient_test.servers }}"
         realm: "{{ result_ipaclient_test.realm }}"
         hostname: "{{ result_ipaclient_test.hostname }}"
-        # debug: yes
+        # debug: true
         krb_name: "{{ result_ipaclient_temp_krb5.krb_name }}"
       register: result_ipaclient_api
 
@@ -444,7 +444,7 @@
 
   always:
   - name: Install - Restore original admin password if overwritten by OTP
-    no_log: yes
+    no_log: true
     ansible.builtin.set_fact:
         ipaadmin_password: "{{ ipaadmin_orig_password }}"
     when: ipaclient_use_otp | bool and ipaadmin_orig_password is defined

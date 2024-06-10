@@ -129,7 +129,7 @@
     dest: "{{item.dest}}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    remote_src: yes
+    remote_src: true
   with_items:
     - { src: /vagrant/scripts , dest: "/home/{{user}}/Desktop" }
 -

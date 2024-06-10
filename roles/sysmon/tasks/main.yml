@@ -25,7 +25,7 @@
     name: sysmon64
   register: result
   failed_when: result is not defined
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Run sysmon
   win_command: "{{ sysmon_install_location }}\\sysmon64.exe -accepteula -i {{ sysmon_install_location }}\\sysmonconfig-export.xml"

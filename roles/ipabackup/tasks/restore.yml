@@ -88,7 +88,7 @@
   - name: Ensure that firewalld is running
     ansible.builtin.systemd:
       name: firewalld
-      enabled: yes
+      enabled: true
       state: started
 
   - name: Firewalld - Verify runtime zone "{{ ipabackup_firewalld_zone }}"
@@ -122,13 +122,13 @@
     {{ "--no-logs" if ipabackup_no_logs | bool else "" }}
     {{ "--log-file=" + ipabackup_log_file if ipabackup_log_file is defined else "" }}
   register: result_iparestore
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Report error for restore operation
   ansible.builtin.debug:
     msg: "{{ result_iparestore.stderr }}"
   when: result_iparestore is failed
-  failed_when: yes
+  failed_when: true
 
 ### CONFIGURE FIREWALLD
 

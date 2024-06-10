@@ -39,25 +39,25 @@ options:
     description: Fully qualified name of IPA servers to enroll to
     type: list
     elements: str
-    required: yes
+    required: true
   realm:
     description: Kerberos realm name of the IPA deployment
     type: str
-    required: yes
+    required: true
   basedn:
     description: The basedn of the IPA server (of the form dc=example,dc=com)
     type: str
-    required: yes
+    required: true
   allow_repair:
     description: |
       Allow repair of already joined hosts. Contrary to ipaclient_force_join
       the host entry will not be changed on the server
     type: bool
-    required: yes
+    required: true
   krb_name:
     description: The krb5 config file name
     type: str
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

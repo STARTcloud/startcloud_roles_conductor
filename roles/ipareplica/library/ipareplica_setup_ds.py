@@ -117,19 +117,19 @@ options:
       The certificate subject base (default O=<realm-name>).
       RDNs are in LDAP order (most specific RDN first).
     type: str
-    required: yes
+    required: true
   server:
     description: Fully qualified name of IPA server to enroll to
     type: str
-    required: yes
+    required: true
   ccache:
     description: The local ccache
     type: str
-    required: yes
+    required: true
   installer_ccache:
     description: The installer ccache setting
     type: str
-    required: yes
+    required: true
   _ca_enabled:
     description: The installer _ca_enabled setting
     type: bool
@@ -142,35 +142,35 @@ options:
   _top_dir:
     description: The installer _top_dir setting
     type: str
-    required: yes
+    required: true
   _add_to_ipaservers:
     description: The installer _add_to_ipaservers setting
     type: bool
-    required: yes
+    required: true
   _ca_subject:
     description: The installer _ca_subject setting
     type: str
-    required: yes
+    required: true
   _subject_base:
     description: The installer _subject_base setting
     type: str
-    required: yes
+    required: true
   dirman_password:
     description: Directory Manager (master) password
     type: str
-    required: yes
+    required: true
   config_setup_ca:
     description: The config setup_ca setting
     type: bool
-    required: yes
+    required: true
   config_master_host_name:
     description: The config master_host_name setting
     type: str
-    required: yes
+    required: true
   config_ca_host_name:
     description: The config ca_host_name setting
     type: str
-    required: yes
+    required: true
   config_ips:
     description: The config ips setting
     type: list

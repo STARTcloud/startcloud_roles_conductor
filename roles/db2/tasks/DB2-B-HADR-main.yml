@@ -1,7 +1,7 @@
 --- 
 - name: "Transferring intial backup from DB2-A-HADR to DB2-B-HADR"
   synchronize: 
-    delete: yes
+    delete: true
     dest: /local/
     src: /local/backup
 - 

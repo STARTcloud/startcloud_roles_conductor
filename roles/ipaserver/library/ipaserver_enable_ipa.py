@@ -44,11 +44,11 @@ options:
   setup_dns:
     description: Configure bind with our zone
     type: bool
-    required: yes
+    required: true
   setup_ca:
     description: Configure a dogtag CA
     type: bool
-    required: yes
+    required: true
 author:
     - Thomas Woerner (@t-woerner)
 '''

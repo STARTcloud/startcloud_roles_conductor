@@ -80,5 +80,5 @@
 -
   name: "Remove Older Packages"
   ansible.builtin.apt:
-    autoremove: yes
-    purge: yes
+    autoremove: true
+    purge: true
