@@ -1,0 +1,126 @@
+---
+-
+  name: "Setting Haxe version"
+  set_fact:
+    local_haxe_version: "{{ haxe_version }}"
+
+-
+  name: "Downloading Haxe tarball"
+  get_url:
+    url: "https://github.com/HaxeFoundation/haxe/releases/download/{{ local_haxe_version }}/haxe-{{ local_haxe_version }}-linux64.tar.gz"
+    dest: "/tmp/haxe-{{ local_haxe_version }}-linux64.tar.gz"
+    mode: '0644'
+
+-
+  name: "Ensuring /opt/haxelib exists"
+  ansible.builtin.file:
+    path: "{{ haxelib_files }}"
+    state: directory
+    owner: "{{ service_user | default(ansible_user_id) }}"
+    group: "{{ service_group | default(ansible_user_id) }}"
+  loop:
+    - "/opt/haxe"
+    - "{{ haxe_home }}"
+    - "{{ haxelib_dir }}"
+  loop_control:
+    loop_var: haxelib_files
+
+-
+  name: "Installing Neko"
+  apt:
+    name: neko
+    state: present
+    update_cache: yes
+
+- 
+  name: "Extracting Haxe tarball"
+  unarchive:
+    src: "/tmp/haxe-{{ local_haxe_version }}-linux64.tar.gz"
+    dest: "{{ haxe_home }}"
+    remote_src: yes
+    creates: "{{ haxe_home }}/haxe_*"
+
+-
+  name: "Finding Haxe directories"
+  find:
+    paths: "{{ haxe_home }}"
+    patterns: 'haxe_*'
+    recurse: no
+  register: haxe_dirs
+
+-
+  name: "Moving extracted Haxe directory to root"
+  command: "mv {{ item.path }} {{ haxe_home }}"
+  args:
+    creates: "{{ haxe_home }}/haxe,{{ haxelib_dir }}"
+  loop: "{{ haxe_dirs.files }}"
+  loop_control:
+    loop_var: haxe_archives
+  when: haxe_dirs.matched > 0
+
+-
+  name: "Setting up Haxelib"
+  ansible.builtin.shell: "{{ item }}"
+  become_user: "{{ service_user | default(ansible_user_id) }}"
+  become: true
+  args:
+    chdir: ~
+    executable: /bin/bash
+    creates: "{{ haxe_home }}"
+  environment:
+    PATH: "$PATH:{{ haxe_home }}"
+  with_items:
+    - "{{ haxelib }} setup {{ haxelib_dir }}"
+
+-
+  name: "Installing individual Dev Haxe library"
+  ansible.builtin.shell: "{{ haxelib }} install git {{ haxe_lib_dev_files }}"
+  become_user: "{{ service_user | default(ansible_user_id) }}"
+  become: true
+  args:
+    chdir: ~
+    executable: /bin/bash
+    creates: "{{ haxe_home }}"
+  environment:
+    PATH: "$PATH:{{ haxe_home }}"
+  loop: "{{ additional_haxe_libraries }}"
+  loop_control:
+    loop_var: haxe_lib_dev_files
+  when: additional_haxe_libraries_dev | length > 0
+
+-
+  name: "Installing individual Haxe library"
+  ansible.builtin.shell: "{{ haxelib }} install {{ haxe_lib_files }}"
+  become_user: "{{ service_user | default(ansible_user_id) }}"
+  become: true
+  args:
+    chdir: ~
+    executable: /bin/bash
+    creates: "{{ haxe_home }}"
+  environment:
+    PATH: "$PATH:{{ haxe_home }}"
+  loop: "{{ additional_haxe_libraries }}"
+  loop_control:
+    loop_var: haxe_lib_files
+  when: additional_haxe_libraries | length > 0
+
+-
+  name: "Setting up OpenFL"
+  ansible.builtin.shell: "{{ item }}"
+  become_user: "{{ service_user | default(ansible_user_id) }}"
+  become: true
+  args:
+    chdir: ~
+    executable: /bin/bash
+    creates: "{{ haxe_home }}"
+  environment:
+    PATH: "$PATH:{{ haxe_home }}"
+  with_items:
+    - "{{ haxelib }} run openfl setup -y --quiet"
+
+-
+  name: "Cleaning up temporary files"
+  file:
+    path: "/tmp/haxe-{{ local_haxe_version }}-linux64.tar.gz"
+    state: absent
+  delegate_to: localhost

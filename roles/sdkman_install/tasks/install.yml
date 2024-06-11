@@ -56,6 +56,12 @@
   become: '{{ service_user != ansible_user_id }}'
   become_user: '{{ service_user }}'
   block:
+    - name: "Check service user and group"
+      ansible.builtin.command: id {{ service_user }}
+      register: service_user_info
+    
+    - debug:
+        var: service_user_info
     -
       name: "Downloading SDKMAN"
       become: true

@@ -1,0 +1,30 @@
+---
+# Default values for variables used in the haxe_install role
+
+# Version of Haxe to install
+haxe_version: "4.3.4"
+
+# Base directory for Haxe installation
+haxe_home: "/opt/haxe/haxe-{{ haxe_version }}"
+
+# Directory for Haxe libraries
+haxelib_dir: "/opt/haxe/haxelib"
+
+# Path to haxe
+haxe: "{{ haxe_home }}/haxe"
+
+# Path to haxelib
+haxelib: "{{ haxe_home }}/haxelib"
+
+# Whether to install Neko (required for Haxe)
+install_neko: true
+
+# Example usage:
+additional_haxe_libraries:
+  - feathersui-validators
+  - lime
+
+# Example usage:
+additional_haxe_libraries_dev:
+  - "mxhx-feathersui https://github.com/mxhx-dev/mxhx-feathersui.git"
+  - "mxhx-component https://github.com/mxhx-dev/mxhx-component.git"

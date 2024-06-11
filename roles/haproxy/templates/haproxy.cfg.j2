@@ -154,13 +154,13 @@ frontend  HTTPS-IN
         acl host_direct_ip            path_reg             -i ^.*\b(\d{1,3}\.){3}\d{1,3}\b.*$
         acl host_demo                 hdr(host)            -i {{ settings.hostname }}.{{ settings.domain }}
         acl host_console              hdr(host)            -i console.{{ settings.hostname }}.{{ settings.domain }}
+        acl is_options                method               OPTIONS
 
 {% if domino_vagrant_rest_api_proxy_url is defined %}
         acl host_restapi              hdr(host)            -i {{ domino_vagrant_rest_api_proxy_url }}
 {% endif %}
 {% if domino_nomadweb_proxy_url is defined %}
         acl host_nomadweb             hdr(host)            -i {{  domino_nomadweb_proxy_url }}
-        acl is_options                method               OPTIONS
 {% endif %}
 {% if domino_install_proxy_url is defined %}
         acl host_domino               hdr(host)            -i {{ domino_install_proxy_url }}
@@ -190,11 +190,12 @@ frontend  HTTPS-IN
         ## Application backends
         use_backend                   console              if host_console
 {% if domino_vagrant_rest_api_proxy_url is defined %}
+        use_backend                   cors_backend         if host_restapi is_options
         use_backend                   restapi              if host_restapi
 {% endif %}
 {% if domino_nomadweb_proxy_url is defined %}
-        use_backend                   nomadweb             if host_nomadweb        
         use_backend                   cors_backend         if host_nomadweb is_options
+        use_backend                   nomadweb             if host_nomadweb        
 {% endif %}
 {% if domino_install_proxy_url is defined %}
         use_backend                   domino               if host_domino || host_demo 
@@ -253,6 +254,10 @@ backend console
 {% if domino_vagrant_rest_api_port_forwards[0].guest is defined %}
 # Rest API
 backend restapi
+        http-response set-header Access-Control-Allow-Origin "*"
+        http-response set-header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+        http-response set-header Access-Control-Allow-Credentials "true"
+        http-response set-header Access-Control-Allow-Methods "GET, DELETE, OPTIONS, POST, PUT, PATCH"
         server  restapi               127.0.0.1:{{ domino_vagrant_rest_api_port_forwards[0].guest }}    check cookie app1 init-addr last,libc,none
 {% endif %}
 {% if startcloud_quick_start_port_forwards[0].guest is defined %}
