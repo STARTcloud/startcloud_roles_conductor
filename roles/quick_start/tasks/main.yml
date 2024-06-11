@@ -99,21 +99,6 @@
     - "{{ cert_dir }}/ca/ca-certificate.pem"
 
 -
-  name: "Creating Python Simple HTTP Server Shell Script"
-  when: ansible_module_running_in_container
-  ansible.builtin.template:
-    src: "start_pythonserve.sh.j2"
-    dest: "/usr/local/bin/start_pythonserve.sh"
-    mode: '0755'
-
--
-  name: "Starting Python Simple HTTP Server in Docker"
-  when: ansible_module_running_in_container
-  ansible.builtin.shell: /usr/local/bin/start_pythonserve.sh
-  async: 86400
-  poll: 0
-
--
   name: "Starting Python Simple HTTP server" # Starts the Python Simple HTTP server service.
   when: not ansible_module_running_in_container
   ansible.builtin.service:
