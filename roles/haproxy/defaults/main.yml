@@ -1,6 +1,7 @@
 ---
 haproxy_http_port: 80
 haproxy_https_port: 443
+haproxy_cfg: haproxy.cfg.j2
 haproxy_ssl_redirect: true
 haproxy_default_backend: "{{ 'downloads' if startcloud_quick_start_proxy_url is defined }}"
 startcloud_haproxy_port_forwards:
