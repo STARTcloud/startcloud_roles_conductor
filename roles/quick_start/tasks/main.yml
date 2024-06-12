@@ -2,6 +2,9 @@
 ## This Ansible playbook demonstrates the setup of a Python Simple HTTP server within a virtual environment,
 ## including directory creation, package installation, service configuration, and support bundle generation.
 # It's designed to be easily understood and replicated by team members.
+-
+  name: "Gathering facts on current container"
+  community.docker.current_container_facts:
 
 -
   name: "Creating Installation Directories" # Creates directories for images and ids under the Python Simple Web Server path.

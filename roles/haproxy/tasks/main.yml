@@ -55,6 +55,15 @@
     mode: '0644'
 
 -
+  name: "Copying System Information Dump On Start Script"
+  ansible.builtin.template:
+    src: dump.sh.j2
+    dest: /etc/haproxy/dump.sh
+    owner: root
+    group: root
+    mode: 'a+x'
+
+-
   name: "Starting service haproxy"
   when: not ansible_module_running_in_container
   ansible.builtin.service:

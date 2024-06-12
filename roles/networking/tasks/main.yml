@@ -1,5 +1,9 @@
 ---
 -
+  name: "Gathering facts on current container"
+  community.docker.current_container_facts:
+
+-
   name: "Gathering Networking Configurations"
   when: not ansible_module_running_in_container
   become: true

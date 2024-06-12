@@ -1,12 +1,12 @@
 ---
 -
   name: "Setting Haxe version"
-  set_fact:
+  ansible.builtin.set_fact:
     local_haxe_version: "{{ haxe_version }}"
 
 -
   name: "Downloading Haxe tarball"
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/HaxeFoundation/haxe/releases/download/{{ local_haxe_version }}/haxe-{{ local_haxe_version }}-linux64.tar.gz"
     dest: "/tmp/haxe-{{ local_haxe_version }}-linux64.tar.gz"
     mode: '0644'
@@ -16,74 +16,78 @@
   ansible.builtin.file:
     path: "{{ haxelib_files }}"
     state: directory
+    mode: "0755"
     owner: "{{ service_user | default(ansible_user_id) }}"
     group: "{{ service_group | default(ansible_user_id) }}"
   loop:
     - "/opt/haxe"
     - "{{ haxe_home }}"
     - "{{ haxelib_dir }}"
+    - /tmp/haxe_temp
   loop_control:
     loop_var: haxelib_files
 
 -
   name: "Installing Neko"
-  apt:
+  ansible.builtin.package:
     name: neko
     state: present
-    update_cache: yes
+    update_cache: true
 
-- 
-  name: "Extracting Haxe tarball"
-  unarchive:
+-
+  name: "Extracting Haxe tarball to temporary directory"
+  ansible.builtin.unarchive:
     src: "/tmp/haxe-{{ local_haxe_version }}-linux64.tar.gz"
-    dest: "{{ haxe_home }}"
-    remote_src: yes
-    creates: "{{ haxe_home }}/haxe_*"
+    dest: "/tmp/haxe_temp"
+    remote_src: true
 
 -
-  name: "Finding Haxe directories"
-  find:
-    paths: "{{ haxe_home }}"
-    patterns: 'haxe_*'
-    recurse: no
-  register: haxe_dirs
+  name: "Synchronizing extracted Haxe files to the target directory"
+  ansible.builtin.shell: "{{ item }}"
+  with_items:
+    - "mv /tmp/haxe_temp/haxe_*/* /opt/haxe/haxe-{{ haxe_version }}/"
 
 -
-  name: "Moving extracted Haxe directory to root"
-  command: "mv {{ item.path }} {{ haxe_home }}"
-  args:
-    creates: "{{ haxe_home }}/haxe,{{ haxelib_dir }}"
-  loop: "{{ haxe_dirs.files }}"
-  loop_control:
-    loop_var: haxe_archives
-  when: haxe_dirs.matched > 0
+  name: "Checking if haxelib directory exists"
+  ansible.builtin.stat:
+    path: "{{ haxelib }}"
+  register: haxelib_dir_check
+
+-
+  name: "Debug haxelib directory existence"
+  failed_when: not haxelib_dir_check.stat.exists
+  ansible.builtin.debug:
+    msg: "The haxelib directory exists."
+  when: haxelib_dir_check.stat.exists and haxelib_dir_check.stat.isdir
+
+-
+  name: "Cleaning up temporary directory"
+  ansible.builtin.file:
+    path: "/tmp/haxe_temp"
+    state: absent
 
 -
   name: "Setting up Haxelib"
   ansible.builtin.shell: "{{ item }}"
   become_user: "{{ service_user | default(ansible_user_id) }}"
-  become: true
   args:
     chdir: ~
     executable: /bin/bash
-    creates: "{{ haxe_home }}"
   environment:
-    PATH: "$PATH:{{ haxe_home }}"
+    PATH: "$PATH:{{ haxe_home }}:/usr/bin"
   with_items:
     - "{{ haxelib }} setup {{ haxelib_dir }}"
 
 -
   name: "Installing individual Dev Haxe library"
-  ansible.builtin.shell: "{{ haxelib }} install git {{ haxe_lib_dev_files }}"
+  ansible.builtin.shell: "{{ haxelib }} git {{ haxe_lib_dev_files.library }} {{ haxe_lib_dev_files.repo }}"
   become_user: "{{ service_user | default(ansible_user_id) }}"
-  become: true
   args:
     chdir: ~
     executable: /bin/bash
-    creates: "{{ haxe_home }}"
   environment:
-    PATH: "$PATH:{{ haxe_home }}"
-  loop: "{{ additional_haxe_libraries }}"
+    PATH: "$PATH:{{ haxe_home }}:/usr/bin"
+  loop: "{{ additional_haxe_libraries_dev }}"
   loop_control:
     loop_var: haxe_lib_dev_files
   when: additional_haxe_libraries_dev | length > 0
@@ -92,13 +96,11 @@
   name: "Installing individual Haxe library"
   ansible.builtin.shell: "{{ haxelib }} install {{ haxe_lib_files }}"
   become_user: "{{ service_user | default(ansible_user_id) }}"
-  become: true
   args:
     chdir: ~
     executable: /bin/bash
-    creates: "{{ haxe_home }}"
   environment:
-    PATH: "$PATH:{{ haxe_home }}"
+    PATH: "$PATH:{{ haxe_home }}:/usr/bin"
   loop: "{{ additional_haxe_libraries }}"
   loop_control:
     loop_var: haxe_lib_files
@@ -108,19 +110,17 @@
   name: "Setting up OpenFL"
   ansible.builtin.shell: "{{ item }}"
   become_user: "{{ service_user | default(ansible_user_id) }}"
-  become: true
   args:
     chdir: ~
     executable: /bin/bash
-    creates: "{{ haxe_home }}"
   environment:
-    PATH: "$PATH:{{ haxe_home }}"
+    PATH: "$PATH:{{ haxe_home }}:/usr/bin"
   with_items:
     - "{{ haxelib }} run openfl setup -y --quiet"
 
 -
   name: "Cleaning up temporary files"
-  file:
+  ansible.builtin.file:
     path: "/tmp/haxe-{{ local_haxe_version }}-linux64.tar.gz"
     state: absent
   delegate_to: localhost

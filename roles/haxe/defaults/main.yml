@@ -26,5 +26,7 @@ additional_haxe_libraries:
 
 # Example usage:
 additional_haxe_libraries_dev:
-  - "mxhx-feathersui https://github.com/mxhx-dev/mxhx-feathersui.git"
-  - "mxhx-component https://github.com/mxhx-dev/mxhx-component.git"
+  - library: 'mxhx-feathersui'
+    repo: 'https://github.com/mxhx-dev/mxhx-feathersui.git'
+  - library: 'mxhx-component'
+    repo: 'https://github.com/mxhx-dev/mxhx-component.git'
