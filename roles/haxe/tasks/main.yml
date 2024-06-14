@@ -80,7 +80,7 @@
 
 -
   name: "Installing individual Dev Haxe library"
-  ansible.builtin.shell: "{{ haxelib }} git {{ haxe_lib_dev_files.library }} {{ haxe_lib_dev_files.repo }}"
+  ansible.builtin.shell: "{{ haxelib }} git {{ haxe_lib_dev_files.library }} {{ haxe_lib_dev_files.repo }} {{ haxe_lib_dev_files.branch }}"
   become_user: "{{ service_user | default(ansible_user_id) }}"
   args:
     chdir: ~

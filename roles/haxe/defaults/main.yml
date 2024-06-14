@@ -28,5 +28,19 @@ additional_haxe_libraries:
 additional_haxe_libraries_dev:
   - library: 'mxhx-feathersui'
     repo: 'https://github.com/mxhx-dev/mxhx-feathersui.git'
+    branch: ""
   - library: 'mxhx-component'
     repo: 'https://github.com/mxhx-dev/mxhx-component.git'
+    branch: ""
+#  - library: 'mxhx-runtime-component'
+#    repo: 'https://github.com/mxhx-dev/mxhx-runtime-component.git'
+#    branch: main
+#  - library: 'moonshine-feathersui-text-editor'
+#    repo: 'https://github.com/Moonshine-IDE/moonshine-feathersui-text-editor.git'
+#    branch: main
+#  - library: 'feathersui'
+#    repo: 'https://github.com/feathersui/feathersui-openfl'
+#    branch: main
+  - library: 'openfl'
+    repo: 'https://github.com/openfl/openfl.git'
+    branch: 9.4.0-Dev

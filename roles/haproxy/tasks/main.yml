@@ -1,10 +1,9 @@
 ---
 -
-  name: "Installing HAProxy and KeepAlived"
+  name: "Installing HAProxy"
   ansible.builtin.apt:
     pkg:
       - haproxy
-      - keepalived
 
 -
   name: "Creating template and certifcate directories"
