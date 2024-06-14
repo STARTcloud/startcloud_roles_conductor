@@ -41,6 +41,7 @@ additional_haxe_libraries_dev:
 #  - library: 'feathersui'
 #    repo: 'https://github.com/feathersui/feathersui-openfl'
 #    branch: main
-  - library: 'openfl'
-    repo: 'https://github.com/openfl/openfl.git'
-    branch: 9.4.0-Dev
+# This may break things
+#  - library: 'openfl'
+#    repo: 'https://github.com/openfl/openfl.git'
+#    branch: 9.4.0-Dev
