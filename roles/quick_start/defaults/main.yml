@@ -1,6 +1,7 @@
 ---
 python_simple_web_server_path: "{{ service_home_dir }}"
 index: index.html.j2
+index_name: index.html
 startcloud_quick_start_port_forwards:
   -
     guest: 8000

@@ -87,7 +87,7 @@
     dest: "{{ item.dest }}" # Specifies the destination file.
     mode: '0644' # Sets the file permissions.
   loop:
-    - { src: '{{ index }}', dest: '{{ python_simple_web_server_path }}/index.html', owner: '{{ service_user }}' }
+    - { src: '{{ index }}', dest: '{{ python_simple_web_server_path }}/{{ index_name }}', owner: '{{ service_user }}' }
 
 -
   name: "Copying Root CA to {{ service_home_dir }}"
