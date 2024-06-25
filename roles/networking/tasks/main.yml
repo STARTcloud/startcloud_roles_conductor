@@ -112,8 +112,13 @@
         -
           name: "Displaying prefix "
           ansible.builtin.debug:
-            msg: "MAC: {{ networks[0].netmask }}, PREFIX: {{ networks[0].netmask | ansible.netcommon.ipaddr('prefix') }}"
+            msg: "{{ networks[0].address | ansible.utils.ipaddr(networks[0].netmask) | ansible.utils.ipaddr('prefix') }}"
     
+        -
+          name: "Setting Netmask as a fact"
+          ansible.builtin.set_fact:
+            net_mask: "{{ networks[0].address }}/{{ networks[0].netmask }}"
+
         -
           name: "Placing Netplan into Working directory"
           ansible.builtin.template:
