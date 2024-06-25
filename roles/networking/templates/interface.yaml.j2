@@ -5,7 +5,7 @@ network:
     renderer: NetworkManager
     {{ network_name }}:
       accept-ra: false
-    {% if networks[0].dhcp4%}
+    {% if not networks[0].dhcp4%}
       addresses:
         - {{ networks[0].address }}/24
       routes:
