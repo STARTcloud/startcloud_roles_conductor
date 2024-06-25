@@ -155,7 +155,7 @@
 
     -
       name: "Setting up NAT Provisioning Network"
-      when: false #networks[0] is defined
+      when: false
       block:
         -
           name: "Placing Netplan into Working directory for Vagrant NAT Adapter"
