@@ -107,7 +107,7 @@
   block:
     -
       name: "Setting up Public Bridged Network"
-      when: networks[0] is defined
+      when: networks[0] is defined and networks[0].type == "external"
       block:
         -
           name: "Placing Netplan into Working directory"
@@ -155,12 +155,12 @@
 
     -
       name: "Setting up NAT Provisioning Network"
-      when: networks[0] is defined and networks[0].type != "external"
+      when: networks[0] is defined and networks[0].type == "internal"
       block:
         -
           name: "Placing Netplan into Working directory for Vagrant NAT Adapter"
           ansible.builtin.template:
-            src: interface.yaml.j2
+            src: nat_interface.yaml.j2
             dest: /etc/netplan/nat_adapter.yaml
             mode: '0600'
           vars:
