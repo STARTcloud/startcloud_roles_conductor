@@ -110,6 +110,11 @@
       when: networks[0] is defined and networks[0].type == "external"
       block:
         -
+          name: "Displaying prefix "
+          ansible.builtin.debug:
+            msg: "MAC: {{ networks[0].netmask }}, PREFIX: {{ networks[0].netmask | ansible.netcommon.ipaddr('prefix') }}"
+    
+        -
           name: "Placing Netplan into Working directory"
           ansible.builtin.template:
             src: interface.yaml.j2
@@ -155,7 +160,7 @@
 
     -
       name: "Setting up NAT Provisioning Network"
-      when: networks[0] is defined
+      when: networks[0] is defined 
       block:
         -
           name: "Placing Netplan into Working directory for Vagrant NAT Adapter"
