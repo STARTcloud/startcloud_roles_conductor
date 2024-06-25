@@ -155,7 +155,7 @@
 
     -
       name: "Setting up NAT Provisioning Network"
-      when: networks[0] is defined and networks[0].type == "internal"
+      when: networks[0] is defined
       block:
         -
           name: "Placing Netplan into Working directory for Vagrant NAT Adapter"
