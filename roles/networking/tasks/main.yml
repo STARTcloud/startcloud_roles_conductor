@@ -158,6 +158,15 @@
             line: "{{ updated_second_ip.stdout }} {{ settings.hostname }} {{ settings.hostname }}.{{ settings.domain }} console.{{ settings.hostname }}.{{ settings.domain }}"
             insertbefore: EOF
 
+        -
+          name: "Ensuring /etc/hosts entries are present"
+          ansible.builtin.lineinfile:
+            path: /etc/hosts
+            state: present
+            create: yes
+            line: "{{ item.ip }} {{ item.hostname }} {{ item.aliases | join(' ') }}"
+          loop: "{{ etc_hosts_entries }}"
+
     -
       name: "Setting up NAT Provisioning Network"
       when: networks[0] is defined 
@@ -230,7 +239,7 @@
             insertbefore: EOF
 
         -
-          name: "Ensurin /etc/hosts entries are present"
+          name: "Ensuring /etc/hosts entries are present"
           ansible.builtin.lineinfile:
             path: /etc/hosts
             state: present
