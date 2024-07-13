@@ -229,6 +229,15 @@
             line: "{{ netoutput.stdout }} {{ settings.hostname }} {{ settings.hostname }}.{{ settings.domain }} console.{{ settings.hostname }}.{{ settings.domain }}"
             insertbefore: EOF
 
+        -
+          name: "Ensurin /etc/hosts entries are present"
+          ansible.builtin.lineinfile:
+            path: /etc/hosts
+            state: present
+            create: yes
+            line: "{{ item.ip }} {{ item.hostname }} {{ item.aliases | join(' ') }}"
+          loop: "{{ etc_hosts_entries }}"
+
 -
   name: "Re-Gathering Networking Configurations"
   become: true

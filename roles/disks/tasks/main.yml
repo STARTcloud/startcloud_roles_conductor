@@ -6,7 +6,6 @@
   when:
     - not vm_encrypted
     - ansible_os_family == 'Debian'    
-    - ansible_virtualization_type == "virtualbox"
   block:
     -
       name: "Setting root partition fact"
@@ -34,7 +33,6 @@
   when:
     - vm_encrypted
     - ansible_os_family == 'Debian'
-    - ansible_virtualization_type == "virtualbox"
   block:
     -
       name: "Setting root partition fact"
@@ -58,48 +56,47 @@
         - "lvresize -l+100%FREE /dev/crypt/root"
         - "resize2fs /dev/mapper/crypt-root"
 
+#-
+#  name: "Configuring Extra Disks for bhyve"
+#  become: true
+#  become_user: root
+#  when: 
+#    - disks.additional_disks[0] is defined
+#    - disks.additional_disks[0] is not string
+##    - disks.additional_disks[0] is not mapping
+##    - disks.additional_disks[0] is iterable
+#    - disks.additional_disks[0] | length > 0
+#    - ansible_virtualization_type != "virtualbox"
+#  block:
+#    -
+#      name: "Creating Mount Points"
+#      become: true
+#      ansible.builtin.file:
+#        path: "{{ item }}"
+#        state: directory
+#      with_items: "{{ disks.additional_disks[0].mount }}"
+#
+#    - 
+#      name: "Creating a {{ disks.additional_disks[0].filesystem }} filesystems on partitions"
+#      ansible.builtin.filesystem:
+#        fstype: "{{ disks.additional_disks[0].filesystem }}"
+#        dev: "/dev/{{ disks.additional_disks[0].device }}"
+#
+#    - 
+#      name: "Mounting Partitions"
+#      ansible.builtin.mount:
+#        path: "{{ disks.additional_disks[0].mount }}"
+#        src: "/dev/{{ disks.additional_disks[0].device }}"
+#        fstype: "{{ disks.additional_disks[0].filesystem }}"
+#        state: mounted
+
 -
-  name: "Configuring Extra Disks for bhyve"
-  become: true
-  become_user: root
-  when: 
-    - disks.additional_disks[0] is defined
-    - disks.additional_disks[0] is not string
-#    - disks.additional_disks[0] is not mapping
-#    - disks.additional_disks[0] is iterable
-    - disks.additional_disks[0] | length > 0
-    - ansible_virtualization_type != "virtualbox"
-  block:
-    -
-      name: "Creating Mount Points"
-      become: true
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-      with_items: "{{ disks.additional_disks[0].mount }}"
-
-    - 
-      name: "Creating a {{ disks.additional_disks[0].filesystem }} filesystems on partitions"
-      ansible.builtin.filesystem:
-        fstype: "{{ disks.additional_disks[0].filesystem }}"
-        dev: "/dev/{{ disks.additional_disks[0].device }}"
-
-    - 
-      name: "Mounting Partitions"
-      ansible.builtin.mount:
-        path: "{{ disks.additional_disks[0].mount }}"
-        src: "/dev/{{ disks.additional_disks[0].device }}"
-        fstype: "{{ disks.additional_disks[0].filesystem }}"
-        state: mounted
-
--
-  name: "Configuring Extra Disks for Virtualbox"
+  name: "Configuring Extra Disks"
   become: true
   become_user: root
   when: 
     - disks.additional_disks is defined
     - disks.additional_disks | length > 0
-    - ansible_virtualization_type == "virtualbox"
   block:
     - 
       name: "Gathering disk information"
