@@ -51,8 +51,13 @@
         ip addr show public_adapter | awk '/inet / {print $2}' | cut -d'/' -f1
       args:
         executable: /bin/bash
-      register: netoutput
+      register: public_adapter_ip
       changed_when: false
+
+    -
+      name: "Storing first adapter details as facts"
+      ansible.builtin.set_fact:
+        netoutput: "{{ public_adapter_ip }}"
     
 -
   name: "Generating Help File"
