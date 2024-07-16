@@ -1,2 +1,5 @@
 ---
 show_help: true
+use_proxy: false
+proxy_http_port: 3128
+proxy_http_server: squid.mydomain.com
