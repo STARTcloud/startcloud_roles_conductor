@@ -246,40 +246,32 @@
       ignore_errors: true
 
     -
-      name: "Checking if port 80 is in use"
-      ansible.builtin.command: ss -tuln | grep ':80 '
-      register: port_80_status
+      name: "Checking if HAProxy is installed"
+      ansible.builtin.command: systemctl status haproxy
+      register: haproxy_status
       ignore_errors: true
 
-    -
-      name: "Checking if HAProxy is not installed and port 80 is in use"
-      ansible.builtin.fail:
-        msg: "HAProxy is not installed and port 80 is in use."
-      when: haproxy_status.rc != 0 and port_80_status.rc == 0
-
-    -
-      name: "Setting LE entries as a fact to consume"
+    - name: "Setting LE entries as a fact to consume"
       ansible.builtin.set_fact:
-        le_entries: "{{ dns_entries | default([]) + [' -d ' + item + '.' + settings.hostname + '.' + settings.domain] }}"
+        le_entries: "{{ (dns_entries | default([])) + ['-d ' + item] }}"
       loop:
         - "{{ settings.hostname }}.{{ settings.domain }}"
 
     -
       name: "Generating new certificate request"
-      ansible.builtin.shell: >
-        certbot certonly --standalone --noninteractive --agree-tos --email {{ email }} {{ le_entries | list }}
-      when: haproxy_status.rc == 0 or (haproxy_status.rc != 0 and port_80_status.rc != 0)
+      ansible.builtin.shell: certbot certonly --standalone --noninteractive --agree-tos  --email {{ settings.email }} {{ le_entries | join(' ') }}
+      when: haproxy_status.rc != 0
 
     -
       name: "Generating new certificate request via HAProxy"
       ansible.builtin.shell: >
-        certbot certonly --standalone --noninteractive --agree-tos --email {{ settings.email }} {{ le_entries | list }} --http-01-port=8080
-      when: haproxy_status.rc == 0 and port_80_status.rc == 0
+        certbot certonly --standalone --noninteractive --agree-tos --email {{ settings.email }} {{ le_entries | list }} --http-01-port=8181
+      when: haproxy_status.rc == 0
 
     -
       name: "Checking if certificate exists"
       register: letsencrypt_cert
-      ansible.builtin.stat: 
+      ansible.builtin.stat:
         path: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
 
     -
@@ -295,7 +287,7 @@
       name: "Creating symlink for privkey.pem if exists"
       ansible.builtin.file:
         src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/privkey.pem"
-        dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
+        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
         owner: "{{ service_user }}"
         state: link
       when: letsencrypt_cert.stat.exists
@@ -304,7 +296,7 @@
       name: "Create symlink for chain.pem if exists"
       ansible.builtin.file:
         src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/chain.pem"
-        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
+        dest: "{{ cert_dir }}/ca/ca-certificate.crt"
         owner: "{{ service_user }}"
         state: link
       when: letsencrypt_cert.stat.exists
