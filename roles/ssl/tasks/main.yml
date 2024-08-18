@@ -75,45 +75,49 @@
   when: selfsigned_enabled
   block:
     -
-      name: "Creating private key for Certifcate Authority"
-      community.crypto.openssl_privatekey:
-        path: "{{ cert_dir }}/ca/ca-certificate.key"
-        passphrase: "{{ cert_pass }}"
-        cipher: 'auto'
-        mode: '0777'
+      name: "Generating Certificate Authority"
+      when: not selfsigned_use_pregenerated
+      block:
+        -
+          name: "Creating private key for Certifcate Authority"
+          community.crypto.openssl_privatekey:
+            path: "{{ cert_dir }}/ca/ca-certificate.key"
+            passphrase: "{{ cert_pass }}"
+            cipher: 'auto'
+            mode: '0777'
 
-    -
-      name: "Creating certificate signing request (CSR) for Certifcate Authority certificate"
-      community.crypto.openssl_csr_pipe:
-        privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
-        privatekey_passphrase: "{{ cert_pass }}"
-        common_name: "{{ settings.domain }}"
-        country_name: "{{ countrycode }}"
-        organization_name: "{{ domino_organization }}"
-        use_common_name_for_san: false
-        basic_constraints:
-          - 'CA:TRUE'
-        basic_constraints_critical: true
-        key_usage:
-          - keyCertSign
-        key_usage_critical: true
-      register: ca_csr
+        -
+          name: "Creating certificate signing request (CSR) for Certifcate Authority certificate"
+          community.crypto.openssl_csr_pipe:
+            privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+            privatekey_passphrase: "{{ cert_pass }}"
+            common_name: "{{ settings.domain }}"
+            country_name: "{{ countrycode }}"
+            organization_name: "{{ domino_organization }}"
+            use_common_name_for_san: false
+            basic_constraints:
+              - 'CA:TRUE'
+            basic_constraints_critical: true
+            key_usage:
+              - keyCertSign
+            key_usage_critical: true
+          register: ca_csr
 
-    -
-      name: "Creating self-signed CA certificate from CA CSR"
-      community.crypto.x509_certificate:
-        path: "{{ cert_dir }}/ca/ca-certificate.pem"
-        csr_content: "{{ ca_csr.csr }}"
-        privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
-        privatekey_passphrase: "{{ cert_pass }}"
-        provider: selfsigned
-        owner: "{{ service_user }}"
-        mode: '0777'
+        -
+          name: "Creating self-signed CA certificate from CA CSR"
+          community.crypto.x509_certificate:
+            path: "{{ cert_dir }}/ca/ca-certificate.crt"
+            csr_content: "{{ ca_csr.csr }}"
+            privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
+            privatekey_passphrase: "{{ cert_pass }}"
+            provider: selfsigned
+            owner: "{{ service_user }}"
+            mode: '0777'
 
     -
       name: "Copying root CA certificate to trusted certificates directory"
       ansible.builtin.copy:
-        src: "{{ cert_dir }}/ca/ca-certificate.pem"
+        src: "{{ cert_dir }}/ca/ca-certificate.crt"
         dest: "/usr/local/share/ca-certificates/ca-certificate.pem"
         owner: root
         group: root
@@ -172,7 +176,7 @@
         privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
         csr_path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
         provider: ownca
-        ownca_path: "{{ cert_dir }}/ca/ca-certificate.pem"
+        ownca_path: "{{ cert_dir }}/ca/ca-certificate.crt"
         ownca_privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
         ownca_privatekey_passphrase: "{{ cert_pass }}"
         owner: "{{ service_user }}"
@@ -210,5 +214,132 @@
         owner: "{{ service_user }}"
         mode: '0777'
         dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-self-signed.jks"
+      environment:
+        PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+
+-
+  name: "Beginning Let's Encrypt Provisioning"
+  when: letsencrypt_enabled
+  block:
+    -
+      name: "Ensuring apt cache is updated"
+      ansible.builtin.apt:
+        cache_valid_time: 3600
+        update_cache: true
+
+    -
+      name: "Upgrading all apt packages"
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+
+    -
+      name: "Adding certbot via apt repo"
+      ansible.builtin.apt:
+        name: certbot
+        state: present
+
+    -
+      name: "Checking if HAProxy is installed"
+      ansible.builtin.command: systemctl status haproxy
+      register: haproxy_status
+      ignore_errors: true
+
+    -
+      name: "Checking if port 80 is in use"
+      ansible.builtin.command: ss -tuln | grep ':80 '
+      register: port_80_status
+      ignore_errors: true
+
+    -
+      name: "Checking if HAProxy is not installed and port 80 is in use"
+      ansible.builtin.fail:
+        msg: "HAProxy is not installed and port 80 is in use."
+      when: haproxy_status.rc != 0 and port_80_status.rc == 0
+
+    -
+      name: "Setting LE entries as a fact to consume"
+      ansible.builtin.set_fact:
+        le_entries: "{{ dns_entries | default([]) + [' -d ' + item + '.' + settings.hostname + '.' + settings.domain] }}"
+      loop:
+        - "{{ settings.hostname }}.{{ settings.domain }}"
+
+    -
+      name: "Generating new certificate request"
+      ansible.builtin.shell: >
+        certbot certonly --standalone --noninteractive --agree-tos --email {{ email }} {{ le_entries | list }}
+      when: haproxy_status.rc == 0 or (haproxy_status.rc != 0 and port_80_status.rc != 0)
+
+    -
+      name: "Generating new certificate request via HAProxy"
+      ansible.builtin.shell: >
+        certbot certonly --standalone --noninteractive --agree-tos --email {{ settings.email }} {{ le_entries | list }} --http-01-port=8080
+      when: haproxy_status.rc == 0 and port_80_status.rc == 0
+
+    -
+      name: "Checking if certificate exists"
+      register: letsencrypt_cert
+      ansible.builtin.stat: 
+        path: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
+
+    -
+      name: "Creating symlink for cert.pem if exists"
+      ansible.builtin.file:
+        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
+        dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
+        owner: "{{ service_user }}"
+        state: link
+      when: letsencrypt_cert.stat.exists
+
+    -
+      name: "Creating symlink for privkey.pem if exists"
+      ansible.builtin.file:
+        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/privkey.pem"
+        dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
+        owner: "{{ service_user }}"
+        state: link
+      when: letsencrypt_cert.stat.exists
+
+    -
+      name: "Create symlink for chain.pem if exists"
+      ansible.builtin.file:
+        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/chain.pem"
+        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
+        owner: "{{ service_user }}"
+        state: link
+      when: letsencrypt_cert.stat.exists
+
+    -
+      name: "Generating self signed PKCS12 file"
+      community.crypto.openssl_pkcs12:
+        action: export
+        path: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pfk"
+        certificate_path: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
+        privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
+        state: present
+        friendly_name: 'pkcs12_file'
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Parsing letsencrypt PKCS12 file to concatenated PEM"
+      community.crypto.openssl_pkcs12:
+        action: parse
+        src: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pfk"
+        path: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pem"
+        state: present
+        owner: "{{ service_user }}"
+        mode: '0777'
+
+    -
+      name: "Creating a keystore for the letsencrypt certificate/private key pair"
+      community.general.java_keystore:
+        name: "{{ settings.hostname }}.{{ settings.domain }}"
+        certificate: "{{ lookup('file', '{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt') }}"
+        private_key: "{{ lookup('file', '{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key') }}"
+        password: "{{ cert_pass }}"
+        owner: "{{ service_user }}"
+        mode: '0777'
+        dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.jks"
       environment:
         PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"

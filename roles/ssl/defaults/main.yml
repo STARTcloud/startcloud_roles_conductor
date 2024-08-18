@@ -1,6 +1,7 @@
 ---
 cert_dir: /secure
 selfsigned_enabled: false
+selfsigned_use_pregenerated: false
 cert_pass: ThisNeedstoBeSecure!
 countrycode: US
 domino_organization: DEMO
