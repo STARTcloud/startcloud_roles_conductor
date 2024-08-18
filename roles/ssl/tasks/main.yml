@@ -20,7 +20,7 @@
 
 -
   name: "Using existing Certificate"
-  when: not selfsigned_enabled
+  when: not selfsigned_enabled and not letsencrypt_enabled
   block:
     -
       name: "Checking if SSL default certs exists"
@@ -72,7 +72,7 @@
 
 -
   name: "Generating Self Signed Certificate"
-  when: selfsigned_enabled
+  when: selfsigned_enabled and not letsencrypt_enabled
   block:
     -
       name: "Generating Certificate Authority"
