@@ -363,13 +363,12 @@
 
     -
       name: "Generating new certificate request"
-      ansible.builtin.shell: certbot certonly --standalone --noninteractive --agree-tos  --email {{ settings.email }} {{ le_entries | join(' ') }}
+      ansible.builtin.shell: certbot certonly --standalone --noninteractive --agree-tos --key-type rsa --email {{ settings.email }} {{ le_entries | join(' ') }}
       when: haproxy_status.rc != 0
 
     -
       name: "Generating new certificate request via HAProxy"
-      ansible.builtin.shell: >
-        certbot certonly --standalone --noninteractive --agree-tos --email {{ settings.email }} {{ le_entries | list }} --http-01-port=8181
+      ansible.builtin.shell: certbot certonly --standalone --noninteractive --agree-tos --key-type rsa --email {{ settings.email }} {{ le_entries | join(' ') }} --http-01-port=8181
       when: haproxy_status.rc == 0
 
     -
@@ -408,11 +407,12 @@
         dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
         owner: "{{ service_user }}"
         group: "{{ service_group }}"
-        mode: '0644'
+        mode: '0777'
         remote_src: yes
 
     -
       name: "Creating symlink for privkey.pem if exists"
+      become: true
       ansible.builtin.file:
         src: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
         dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}.key"
@@ -423,6 +423,7 @@
 
     -
       name: "Generating self signed PKCS12 file"
+      become: true
       community.crypto.openssl_pkcs12:
         action: export
         path: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pfk"
@@ -436,6 +437,7 @@
 
     -
       name: "Creating symlink for PFX if exists"
+      become: true
       ansible.builtin.file:
         src: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pfk"
         dest: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}.pfk"
@@ -446,6 +448,7 @@
 
     -
       name: "Parsing letsencrypt PKCS12 file to concatenated PEM"
+      become: true
       community.crypto.openssl_pkcs12:
         action: parse
         src: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pfk"
@@ -457,6 +460,7 @@
 
     -
       name: "Creating symlink for Combined if exists"
+      become: true
       ansible.builtin.file:
         src: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pem"
         dest: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}.pem"
@@ -467,6 +471,7 @@
 
     -
       name: "Creating a keystore for the letsencrypt certificate/private key pair"
+      become: true
       community.general.java_keystore:
         name: "{{ settings.hostname }}.{{ settings.domain }}"
         certificate: "{{ lookup('file', '{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt') }}"
@@ -481,6 +486,7 @@
 
     -
       name: "Creating symlink for JKS if exists"
+      become: true
       ansible.builtin.file:
         src: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.jks"
         dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}.jks"
