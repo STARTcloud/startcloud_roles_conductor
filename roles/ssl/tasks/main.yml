@@ -420,6 +420,7 @@
         group: "{{ service_group }}"
         state: link
         mode: '0644'
+        force: yes 
 
     -
       name: "Generating self signed PKCS12 file"
