@@ -387,6 +387,7 @@
         owner: "{{ service_user }}"
         group: "{{ service_group }}"
         mode: '0644'
+        remote_src: yes
 
     -
       name: "Creating symlink for CRT"
@@ -408,6 +409,7 @@
         owner: "{{ service_user }}"
         group: "{{ service_group }}"
         mode: '0644'
+        remote_src: yes
 
     -
       name: "Creating symlink for privkey.pem if exists"
