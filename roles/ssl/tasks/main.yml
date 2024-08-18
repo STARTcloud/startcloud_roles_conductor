@@ -370,12 +370,12 @@
     -
       name: "Generating new staging certificate request"
       ansible.builtin.shell: certbot certonly --standalone --noninteractive --agree-tos --key-type rsa --staging --email {{ settings.email }} {{ le_entries | join(' ') }}
-      when: haproxy_status.rc != 0 and not letsencrypt_cert.stat.exists and not letsencrypt_staging_enabled
+      when: haproxy_status.rc != 0 and not letsencrypt_cert.stat.exists and letsencrypt_staging_enabled
 
     -
       name: "Generating new staging  request via HAProxy"
       ansible.builtin.shell: certbot certonly --standalone --noninteractive --agree-tos --key-type rsa --staging --email {{ settings.email }} {{ le_entries | join(' ') }} --http-01-port=8181
-      when: haproxy_status.rc == 0 and not letsencrypt_cert.stat.exists and not letsencrypt_staging_enabled
+      when: haproxy_status.rc == 0 and not letsencrypt_cert.stat.exists and letsencrypt_staging_enabled
 
     -
       name: "Generating new certificate request"
