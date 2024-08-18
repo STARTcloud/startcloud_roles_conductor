@@ -6,7 +6,7 @@
     state: directory
     owner: "{{ service_user }}"
     group: "{{ service_group }}"
-    mode: '0777'
+    mode: '0755'
   with_items:
     - "{{ cert_dir }}"
     - "{{ cert_dir }}/key"
@@ -32,6 +32,36 @@
         - "{{ cert_dir }}/ca/default-signed.ca"
 
     -
+      name: "Creating symlink for Signed SSL Key"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/key/default-signed.key"
+        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}.key"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
+      name: "Creating symlink for Signed SSL crt"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/crt/default-signed.crt"
+        dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}.crt"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
+      name: "Creating symlink for Signed SSL CA"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/ca/default-signed.ca"
+        dest: "{{ cert_dir }}/ca/{{ settings.hostname }}.{{ settings.domain }}.crt"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
       name: "Generating Signed PKCS12 file"
       community.crypto.openssl_pkcs12:
         action: export
@@ -47,6 +77,16 @@
         mode: '0777'
 
     -
+      name: "Creating symlink for Signed SSL PFX"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/pfx/default-signed.pfk"
+        dest: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}.pfk"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
       name: "Parsing PKCS12 file to concatenated PEM"
       community.crypto.openssl_pkcs12:
         action: parse
@@ -55,6 +95,16 @@
         state: present
         owner: "{{ service_user }}"
         mode: '0777'
+
+    -
+      name: "Creating symlink for Combined"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/combined/default-signed.crt"
+        dest: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}.pem"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
 
     -
       name: "Creating a keystore for the given certificate/private key pair"
@@ -69,6 +119,16 @@
         dest: "{{ cert_dir }}/jks/default-signed.jks"
       environment:
         PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+
+    -
+      name: "Creating symlink for JKS"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/jks/default-signed.jks"
+        dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}.jks"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
 
 -
   name: "Generating Self Signed Certificate"
@@ -137,6 +197,16 @@
         mode: '0777'
 
     -
+      name: "Creating symlink for self signed SSL Key"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
+        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}.key"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
       name: "Setting DNS entries as a fact"
       ansible.builtin.set_fact:
         dns_entries: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
@@ -183,6 +253,16 @@
         mode: '0777'
 
     -
+      name: "Creating symlink for crt"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-self-signed.crt"
+        dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}.crt"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
       name: "Generating self signed PKCS12 file"
       community.crypto.openssl_pkcs12:
         action: export
@@ -195,6 +275,16 @@
         mode: '0777'
 
     -
+      name: "Creating symlink for PKCS12"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pfk"
+        dest: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}.pfk"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
       name: "Parsing self-signed PKCS12 file to concatenated PEM"
       community.crypto.openssl_pkcs12:
         action: parse
@@ -203,6 +293,16 @@
         state: present
         owner: "{{ service_user }}"
         mode: '0777'
+
+    -
+      name: "Creating symlink for combined"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pem"
+        dest: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}.pem"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
 
     -
       name: "Creating a keystore for the self-signed certificate/private key pair"
@@ -216,6 +316,16 @@
         dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-self-signed.jks"
       environment:
         PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+
+    -
+      name: "Creating symlink for JKS"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-self-signed.jks"
+        dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}.jks"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
 
 -
   name: "Beginning Let's Encrypt Provisioning"
@@ -269,22 +379,45 @@
         path: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
 
     -
-      name: "Creating symlink for cert.pem if exists"
-      ansible.builtin.file:
+      name: "Copying cert.pem if exists"
+      when: letsencrypt_cert.stat.exists
+      ansible.builtin.copy:
         src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
         dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
         owner: "{{ service_user }}"
-        state: link
+        group: "{{ service_group }}"
+        mode: '0644'
+
+    -
+      name: "Creating symlink for CRT"
       when: letsencrypt_cert.stat.exists
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
+        dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}.crt"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
+
+    -
+      name: "Copying privkey.pem"
+      when: letsencrypt_cert.stat.exists
+      ansible.builtin.copy:
+        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/privkey.pem"
+        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        mode: '0644'
 
     -
       name: "Creating symlink for privkey.pem if exists"
       ansible.builtin.file:
-        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/privkey.pem"
-        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
+        src: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
+        dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}.key"
         owner: "{{ service_user }}"
+        group: "{{ service_group }}"
         state: link
-      when: letsencrypt_cert.stat.exists
+        mode: '0644'
 
     -
       name: "Generating self signed PKCS12 file"
@@ -296,7 +429,18 @@
         state: present
         friendly_name: 'pkcs12_file'
         owner: "{{ service_user }}"
-        mode: '0777'
+        group: "{{ service_group }}"
+        mode: '0644'
+
+    -
+      name: "Creating symlink for PFX if exists"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pfk"
+        dest: "{{ cert_dir }}/pfx/{{ settings.hostname }}.{{ settings.domain }}.pfk"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
 
     -
       name: "Parsing letsencrypt PKCS12 file to concatenated PEM"
@@ -306,7 +450,18 @@
         path: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pem"
         state: present
         owner: "{{ service_user }}"
-        mode: '0777'
+        group: "{{ service_group }}"
+        mode: '0644'
+
+    -
+      name: "Creating symlink for Combined if exists"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.pem"
+        dest: "{{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}.pem"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
 
     -
       name: "Creating a keystore for the letsencrypt certificate/private key pair"
@@ -316,7 +471,18 @@
         private_key: "{{ lookup('file', '{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key') }}"
         password: "{{ cert_pass }}"
         owner: "{{ service_user }}"
-        mode: '0777'
+        group: "{{ service_group }}"
+        mode: '0644'
         dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.jks"
       environment:
         PATH: "{{ ansible_env.PATH }}:{{ service_home_dir }}/.sdkman/candidates/java/current/bin"
+
+    -
+      name: "Creating symlink for JKS if exists"
+      ansible.builtin.file:
+        src: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.jks"
+        dest: "{{ cert_dir }}/jks/{{ settings.hostname }}.{{ settings.domain }}.jks"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        state: link
+        mode: '0644'
