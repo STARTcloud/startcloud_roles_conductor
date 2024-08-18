@@ -360,3 +360,4 @@
             create: yes
             line: "{{ item.ip }} {{ item.hostname }} {{ item.aliases | join(' ') }}"
           loop: "{{ etc_hosts_entries }}"
+          when: etc_hosts_entries is iterable
