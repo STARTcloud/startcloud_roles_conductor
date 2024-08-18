@@ -245,12 +245,6 @@
       register: haproxy_status
       ignore_errors: true
 
-    -
-      name: "Checking if HAProxy is installed"
-      ansible.builtin.command: systemctl status haproxy
-      register: haproxy_status
-      ignore_errors: true
-
     - name: "Setting LE entries as a fact to consume"
       ansible.builtin.set_fact:
         le_entries: "{{ (dns_entries | default([])) + ['-d ' + item] }}"
@@ -288,15 +282,6 @@
       ansible.builtin.file:
         src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/privkey.pem"
         dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
-        owner: "{{ service_user }}"
-        state: link
-      when: letsencrypt_cert.stat.exists
-
-    -
-      name: "Create symlink for chain.pem if exists"
-      ansible.builtin.file:
-        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/chain.pem"
-        dest: "{{ cert_dir }}/ca/ca-certificate.crt"
         owner: "{{ service_user }}"
         state: link
       when: letsencrypt_cert.stat.exists
