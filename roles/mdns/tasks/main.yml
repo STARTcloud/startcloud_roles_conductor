@@ -27,9 +27,9 @@
         update_cache: true
 
     -
-      name: "Adding Additional Dependencies {{ packages }}"
+      name: "Adding Additional Dependencies avahi-daemon"
       ansible.builtin.apt:
-        name: "{{ packages }}"
+        name: avahi-daemon
         state: present
     
     - 
