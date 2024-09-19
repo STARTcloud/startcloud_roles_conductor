@@ -2,8 +2,8 @@
 -
   name: "Set SDKMAN user/group vars"
   ansible.builtin.set_fact:
-    sdk_service_user: '{{ service_user | default(ansible_user_id) }}'
-    sdk_service_group: '{{ service_group | default(ansible_user_gid) }}'
+    sdk_service_user: '{{ service_user }}'
+    sdk_service_group: '{{ service_group }}'
 
 -
   name: "Setting SDKMAN_DIR environment variable"
@@ -82,7 +82,7 @@
     -
       name: "Running SDKMAN Install script"
       environment:
-        SDKMAN_DIR: '{{ sdkman_dir | default(service_home_dir + "/.sdkman") }}'
+        SDKMAN_DIR: '{{ sdkman_dir }}'
         SDKMAN_OFFLINE_MODE: 'false'
       ansible.builtin.command: /bin/bash {{ sdkman_tmp_dir }}/sdkman_script
       args:
@@ -104,9 +104,8 @@
 -
   name: "Configuring SDKMAN"
   environment:
-    SDKMAN_DIR: '{{ sdkman_dir | default(service_home_dir + "/.sdkman") }}'
+    SDKMAN_DIR: '{{ sdkman_dir }}'
     SDKMAN_OFFLINE_MODE: 'false'
-  become: '{{ sdk_service_user != ansible_user_id }}'
   become_user: '{{ sdk_service_user }}'
   block:
     -
@@ -129,7 +128,8 @@
 
     -
       name: Update SDKMAN
-      ansible.builtin.shell: . {{ sdkman_dir }}/bin/sdkman-init.sh && sdk selfupdate
+      ansible.builtin.shell: >-
+       . {{ sdkman_dir }}/bin/sdkman-init.sh && sdk selfupdate
       args:
         executable: /bin/bash
       register: sdk_selfupdate
