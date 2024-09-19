@@ -1,11 +1,7 @@
 ---
 -
   name: "Installing SDKMAN"
-  environment:
-    SDKMAN_DIR: '{{ service_home_dir }}/.sdkman'
-    SDKMAN_OFFLINE_MODE: 'false'
   become: true
-  become_user: "{{ service_user }}"
   block:
     -
       name: "Set SDKMAN user/group vars"
