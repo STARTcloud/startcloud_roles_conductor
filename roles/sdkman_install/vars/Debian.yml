@@ -1,7 +1,5 @@
 ---
 # vars for Debian systems
-service_user: "{{ service_user }}"
-service_group: "{{ service_user }}"
 system_packages:
   - curl
   - debianutils
