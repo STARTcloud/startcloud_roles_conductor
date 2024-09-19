@@ -4,7 +4,7 @@
   environment:
     SDKMAN_DIR: '{{ sdkman_dir | default(service_home_dir + "/.sdkman") }}'
     SDKMAN_OFFLINE_MODE: 'false'
-  become: '{{ service_user != ansible_user_id }}'
+  become: true
   become_user: '{{ service_user }}'
   block:
     -
