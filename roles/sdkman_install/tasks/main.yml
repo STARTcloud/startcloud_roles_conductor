@@ -113,8 +113,8 @@
       ansible.builtin.template:
         src: templates/sdkman_config.j2
         dest: '{{ sdkman_dir }}/etc/config'
-        owner: '{{ service_user }}'
-        group: '{{ service_group }}'
+        owner: '{{ sdk_service_user }}'
+        group: '{{ sdk_service_group }}'
         mode: '0755'
 
     -
@@ -163,38 +163,6 @@
       changed_when: >-
         not item.candidate + ' ' + item.version + ' is not installed.'
         in sdk_uninstall.stdout
-
-    -
-      name: Get SDK defaults
-      ansible.builtin.shell: . {{ sdkman_dir }}/bin/sdkman-init.sh && sdk current {{ item }}
-      args:
-        executable: /bin/bash
-      register: get_sdk_defaults
-      changed_when: false
-      loop: >-
-        {{ sdkman_install_packages | map(attribute="candidate") | unique | list }}
-
-    -
-      name: Set SDK defaults
-      ansible.builtin.shell: >-
-        . {{ sdkman_dir }}/bin/sdkman-init.sh &&
-        sdk default {{ item.key }} {{ item.value }}
-      args:
-        executable: /bin/bash
-      loop: '{{ sdkman_defaults | dict2items }}'
-      changed_when: >-
-        not item.value in
-        (get_sdk_defaults.results |
-         selectattr('item', 'equalto', item.key) |
-         first).stdout
-
-    -
-      name: Flush SDK caches (after)
-      ansible.builtin.shell: . {{ sdkman_dir }}/bin/sdkman-init.sh && sdk flush {{ item }}
-      args:
-        executable: /bin/bash
-      loop: '{{ sdkman_flush_caches_after }}'
-      changed_when: false
 
     -
       name: "Persisting additional SDKMAN environment variables"
