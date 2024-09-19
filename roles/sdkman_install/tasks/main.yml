@@ -103,9 +103,6 @@
 
 -
   name: "Configuring SDKMAN"
-  environment:
-    SDKMAN_DIR: '{{ sdkman_dir }}'
-    SDKMAN_OFFLINE_MODE: 'false'
   become_user: '{{ sdk_service_user }}'
   block:
     -

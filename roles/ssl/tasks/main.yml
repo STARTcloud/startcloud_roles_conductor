@@ -209,7 +209,7 @@
     -
       name: "Setting DNS entries as a fact"
       ansible.builtin.set_fact:
-        dns_entries: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
+        dns_entries_list: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
       loop:
         - nomadweb
         - domino
@@ -232,7 +232,7 @@
       community.crypto.openssl_csr:
         path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
         privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
-        subject_alt_name: "{{ dns_entries | list }}"
+        subject_alt_name: "{{ dns_entries_list | list }}"
         country_name: "{{ countrycode }}"
         organization_name: "{{ domino_organization }}"
         common_name: "{{ settings.hostname }}.{{ settings.domain }}"
@@ -357,7 +357,7 @@
 
     - name: "Setting LE entries as a fact to consume"
       ansible.builtin.set_fact:
-        le_entries: "{{ (dns_entries | default([])) + ['-d ' + item] }}"
+        le_entries: "{{ (dns_entries_list | default([])) + ['-d ' + item] }}"
       loop:
         - "{{ settings.hostname }}.{{ settings.domain }}"
 

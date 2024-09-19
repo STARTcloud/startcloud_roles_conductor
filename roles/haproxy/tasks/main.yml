@@ -25,7 +25,7 @@
     dest: "{{ item.dest }}"
     mode: "a+x"
   loop:
-    - { src: '{{ haproxy_cfg  }}', dest: '/etc/haproxy/haproxy.cfg', owner: 'haproxy' }
+    - { src: '{{ haproxy_cfg }}', dest: '/etc/haproxy/haproxy.cfg', owner: 'haproxy' }
     - { src: 'tpl/400.http.j2', dest: '/etc/haproxy/errors/tpl/400.http', owner: 'haproxy' }
     - { src: 'tpl/403.http.j2', dest: '/etc/haproxy/errors/tpl/403.http', owner: 'haproxy' }
     - { src: 'tpl/404.http.j2', dest: '/etc/haproxy/errors/tpl/404.http', owner: 'haproxy' }
