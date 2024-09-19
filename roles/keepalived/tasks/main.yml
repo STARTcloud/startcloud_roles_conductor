@@ -38,7 +38,7 @@
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: "a+x"
+    mode: "644"
   loop:
     - { src: 'keepalived.conf.j2', dest: '/etc/keepalived/keepalived.conf'}
 
