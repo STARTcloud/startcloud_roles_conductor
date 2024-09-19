@@ -6,7 +6,7 @@
 -
   name: "Installing SDKMAN"
   environment:
-    SDKMAN_DIR: '{{ sdkman_dir }}'
+    SDKMAN_DIR: '{{ sdkman_dir | default("~/.sdkman") }}'
     SDKMAN_OFFLINE_MODE: 'false'
   become: '{{ service_user != ansible_user_id }}'
   become_user: '{{ service_user }}'

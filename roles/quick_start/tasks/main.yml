@@ -148,7 +148,7 @@
     remote_src: true
     owner: "{{ service_user }}"
   with_items:
-    - "{{ cert_dir }}/ca/ca-certificate.pem"
+    - "{{ cert_dir }}/ca/ca-certificate.crt"
 
 -
   name: "Starting Python Simple HTTP server" # Starts the Python Simple HTTP server service.

@@ -37,12 +37,12 @@
     owner: '{{ service_user }}'
     group: '{{ service_group }}'
   with_items:
-    - "{{ service_home_dir }}/.ansible/tmp"
+    - "~/.ansible/tmp"
 
 -
   name: "Setting SDKMAN_DIR environment variable"
   ansible.builtin.set_fact:
-    sdkman_dir: '{{ sdkman_dir | default(service_home_dir + "/.sdkman") }}'
+    sdkman_dir: '{{ sdkman_dir | default("~/.sdkman") }}'
 
 -
   name: "Checking for SDKMAN installation"
