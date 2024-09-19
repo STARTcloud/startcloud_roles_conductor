@@ -18,7 +18,7 @@ sdkman_update: true
 # Configuration file options
 # Reference: http://sdkman.io/usage (Configuration section)
 sdkman_auto_answer: true
-sdkman_selfupdate_enable: false
+sdkman_selfupdate_enable: true
 sdkman_insecure_ssl: false
 sdkman_disable_gvm_alias: false
 sdkman_curl_connect_timeout: 7
