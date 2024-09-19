@@ -4,6 +4,37 @@
   ansible.builtin.apt:
     pkg:
       - keepalived
+
+-
+  name: "Executing shell command to sort network interfaces"
+  when: networks[0] is defined
+  changed_when: false
+  ansible.builtin.shell: "ls /sys/class/net | grep -v ^lo$"
+  args:
+    executable: /bin/bash
+  register: sorted_interfaces_output
+-
+  name: "Parsing output to get interface names"
+  ansible.builtin.set_fact:
+    interfaces: "{{ sorted_interfaces_output.stdout_lines }}"
+-
+  name: "Ensuring there are at least two interfaces"
+  ansible.builtin.fail:
+    msg: "Less than two network interfaces found."
+  when: interfaces | length < 2
+-
+  name: "Setting first and second adapters"
+  ansible.builtin.set_fact:
+    first_adapter: "{{ interfaces[0] }}"
+    second_adapter: "{{ interfaces[1] }}"
+-
+  name: "Gathering details of the first adapter"
+  changed_when: false
+  ansible.builtin.shell: "ip addr show {{ first_adapter }} | awk '/inet / {print $2}'"
+  args:
+    executable: /bin/bash
+  register: first_ip
+
 -
   name: "Configuring keepalived"
   become: true

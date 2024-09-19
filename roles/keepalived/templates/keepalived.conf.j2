@@ -5,7 +5,7 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_instance VI_1 {
-  interface {{ interface }}
+  interface {{ first_adapter }}
   state {{ startcloud_keepalived_state }} #MASTER
   virtual_router_id {{  startcloud_keepalived_virtual_router_id }}
   priority {{  startcloud_keepalived_priority }}
