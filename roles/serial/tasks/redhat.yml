@@ -19,7 +19,6 @@
     - ExecStart=
     - "ExecStart=/sbin/agetty --autologin root -8 --keep-baud 115200,38400,9600 ttyS0 $TERM"
 
-
 -
   name: "Ensuring that a serial terminal is enabled in Grub"
   ansible.builtin.lineinfile:
@@ -59,6 +58,18 @@
     mode: "0755"
 
 -
+  name: "Setting EFI boot executable"
+  when: ansible_distribution == 'AlmaLinux'
+  ansible.builtin.set_fact:
+    grub_efi_src: /boot/efi/EFI/almalinux/grubx64.efi
+
+-
+  name: "Setting EFI boot executable"
+  when: ansible_distribution == 'RedHat'
+  ansible.builtin.set_fact:
+    grub_efi_src: /boot/efi/EFI/redhat/grubx64.efi
+
+-
   name: "Copying Grub EFI file"
   become: true
   ansible.builtin.copy:
@@ -66,12 +77,3 @@
     dest: /boot/efi/EFI/BOOT/BOOTX64.EFI
     remote_src: true
     mode: "644"
-  vars:
-    grub_efi_src: >-
-      {% if ansible_distribution == 'AlmaLinux' %}
-      /boot/efi/EFI/almalinux/grubx64.efi
-      {% elif ansible_distribution == 'RedHat' %}
-      /boot/efi/EFI/redhat/grubx64.efi
-      {% else %}
-      /boot/efi/EFI/{{ ansible_distribution | lower }}/grubx64.efi
-      {% endif %}

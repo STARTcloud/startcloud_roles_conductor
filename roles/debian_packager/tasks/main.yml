@@ -40,11 +40,13 @@
       ansible.builtin.file:
         path: "{{ service_home_dir }}/{{ package_org }}/{{ package_name }}"
         state: directory
+        mode: "0755"
 
     -
       name: "Creating main.c file"
       ansible.builtin.copy:
         dest: "{{ service_home_dir }}/{{ package_org }}/{{ package_name }}/main.c"
+        mode: "0644"
         content: |
           #include <stdio.h>
           int main() {
@@ -63,6 +65,7 @@
       ansible.builtin.file:
         path: "{{ service_home_dir }}/{{ package_org }}/{{ package_name }}_{{ package_version }}-1_{{ item }}"
         state: directory
+        mode: "0755"
       loop: "{{ package_arch }}"
 
     -
@@ -70,6 +73,7 @@
       ansible.builtin.file:
         path: "{{ service_home_dir }}/{{ package_org }}/{{ package_name }}_{{ package_version }}-1_{{ item }}/usr/bin"
         state: directory
+        mode: "0755"
       loop: "{{ package_arch }}"
 
     -
@@ -81,23 +85,25 @@
       loop: "{{ package_arch }}"
 
     -
-      name: "Creating DEBIAN directory in package"  
+      name: "Creating DEBIAN directory in package"
       ansible.builtin.file:
         path: "{{ service_home_dir }}/{{ package_org }}/{{ package_name }}_{{ package_version }}-1_{{ item }}/DEBIAN"
         state: directory
+        mode: "0755"
       loop: "{{ package_arch }}"
 
     -
       name: "Creating control file"
       ansible.builtin.copy:
         dest: "{{ service_home_dir }}/{{ package_org }}/{{ package_name }}_{{ package_version }}-1_{{ item }}/DEBIAN/control"
+        mode: "0644"
         content: |
           Package: {{ package_name }}
           Version: {{ package_version }}
-          Maintainer: {{ package_maintainer_email }} 
-          Depends: {{ package_dependencies }} 
-          Architecture: {{ package_arch }} 
-          Homepage: {{ package_maintainer_address }} 
+          Maintainer: {{ package_maintainer_email }}
+          Depends: {{ package_dependencies }}
+          Architecture: {{ package_arch }}
+          Homepage: {{ package_maintainer_address }}
           Description: {{ package_description }}
       loop: "{{ package_arch }}"
 

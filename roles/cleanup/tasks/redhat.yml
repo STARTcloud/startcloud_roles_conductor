@@ -26,10 +26,7 @@
 
 - name: "Removing unwanted packages"
   ansible.builtin.dnf:
-    name:
-      - ppp
-      - wireless-tools
-      - linux-firmware
+    name: "{{ packages }}"
     state: absent
 
 # Skipping Deborphan cleanup (not applicable to Red Hat)

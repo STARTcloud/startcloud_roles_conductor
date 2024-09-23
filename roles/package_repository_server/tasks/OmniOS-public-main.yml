@@ -2,7 +2,7 @@
 -
   name: "Stopping pkg server"
   become: true
-  ansible.builtin.service: 
+  ansible.builtin.service:
     name: "pkg/server:{{ pkg_server.omnios_release }}_{{ pkg_server.archive }}"
     state: started
 
