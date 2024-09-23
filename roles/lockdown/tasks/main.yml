@@ -10,10 +10,19 @@
 
 -
   name: "Changing startcloud Password"
+  when: lockdown_use_settings_password
   ansible.builtin.user:
     name: "startcloud"
     state: present
     password: "{{ settings.vagrant_user_pass | password_hash('sha512') }}"
+
+-
+  name: "Changing startcloud Password"
+  when: not lockdown_use_settings_password
+  ansible.builtin.user:
+    name: "startcloud"
+    state: present
+    password: "{{ lockdown_new_password | password_hash('sha512') }}"
 
 -
   name: "Generating an OpenSSH keypair with the default values"
