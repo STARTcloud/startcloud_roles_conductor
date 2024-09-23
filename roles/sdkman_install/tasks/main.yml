@@ -166,7 +166,6 @@
 
     -
       name: "Persisting additional SDKMAN environment variables"
-      become_user: '{{ sdk_service_user }}'
       ansible.builtin.include_tasks: persist_env.yml
       loop:
         - .bash_profile
