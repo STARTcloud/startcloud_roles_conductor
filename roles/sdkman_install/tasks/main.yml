@@ -103,7 +103,6 @@
 
 -
   name: "Configuring SDKMAN"
-  become_user: '{{ sdk_service_user }}'
   block:
     -
       name: Configure SDKMAN
@@ -116,6 +115,7 @@
 
     -
       name: Flush SDK caches (before)
+      become_user: '{{ sdk_service_user }}'
       ansible.builtin.shell: >-
         . {{ sdkman_dir }}/bin/sdkman-init.sh && sdk flush {{ item }}
       args:
@@ -125,6 +125,7 @@
 
     -
       name: Update SDKMAN
+      become_user: '{{ sdk_service_user }}'
       ansible.builtin.shell: >-
        . {{ sdkman_dir }}/bin/sdkman-init.sh && sdk selfupdate
       args:
@@ -135,6 +136,7 @@
 
     -
       name: Install SDK candidates/versions
+      become_user: '{{ sdk_service_user }}'
       ansible.builtin.shell: >-
         . {{ sdkman_dir }}/bin/sdkman-init.sh &&
         sdk install {{ item.candidate }} {{ item.version | default('') }} {{ item.localpath | default('') }}
@@ -150,6 +152,7 @@
 
     -
       name: Uninstall SDK candidates/versions
+      become_user: '{{ sdk_service_user }}'
       ansible.builtin.shell: >-
         . {{ sdkman_dir }}/bin/sdkman-init.sh &&
         sdk uninstall {{ item.candidate }} {{ item.version }}
@@ -163,6 +166,7 @@
 
     -
       name: "Persisting additional SDKMAN environment variables"
+      become_user: '{{ sdk_service_user }}'
       ansible.builtin.include_tasks: persist_env.yml
       loop:
         - .bash_profile
