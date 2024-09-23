@@ -1,4 +1,6 @@
 ---
+extra_packages:
+  - htop
 packages:
   - htop
   - lynx

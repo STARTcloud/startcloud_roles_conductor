@@ -27,7 +27,13 @@
     update_cache: true
 
 -
-  name: "Adding Additional Dependencies {{ packages }}"
+  name: "Adding Additional packages"
   ansible.builtin.apt:
     name: "{{ packages }}"
+    state: present
+
+-
+  name: "Adding Additional Dependencies"
+  ansible.builtin.apt:
+    name: "{{ extra_packages }}"
     state: present

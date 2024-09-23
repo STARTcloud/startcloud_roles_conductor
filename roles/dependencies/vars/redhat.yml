@@ -1,4 +1,6 @@
 ---
+extra_packages:
+  - htop
 packages:
   - dracut-config-generic
   - grub2-pc
