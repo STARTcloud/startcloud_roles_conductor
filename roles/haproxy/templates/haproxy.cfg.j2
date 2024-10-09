@@ -26,7 +26,7 @@ global
         ca-base /etc/ssl/certs
         crt-base /etc/ssl/private
 
-        
+
         tune.ssl.default-dh-param 4096
         #ssl-dh-param-file /path/to/dhparam
 
@@ -87,7 +87,7 @@ http-errors allerrors
 frontend  STATS
         mode http
 {% if selfsigned_enabled %}
-        bind :::{{ startcloud_haproxy_port_forwards[2].guest }} ssl crt {{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pem
+        bind :::{{ startcloud_haproxy_port_forwards[2].guest }} ssl crt {{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}.pem
 {% else %}
         bind :::{{ startcloud_haproxy_port_forwards[2].guest }} ssl crt {{ cert_dir }}/combined/default-signed.pem
 {% endif %}
@@ -123,7 +123,7 @@ frontend EXT-WEB:{{ startcloud_haproxy_port_forwards[0].guest}}
 {# running on this server.  #}
 frontend  HTTPS-IN
 {% if selfsigned_enabled %}
-        bind :::{{ startcloud_haproxy_port_forwards[1].guest}} v4v6 ssl crt  {{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}-self-signed.pem
+        bind :::{{ startcloud_haproxy_port_forwards[1].guest}} v4v6 ssl crt  {{ cert_dir }}/combined/{{ settings.hostname }}.{{ settings.domain }}.pem
 {% else %}
         bind :::{{ startcloud_haproxy_port_forwards[1].guest}} v4v6 ssl crt  {{ cert_dir }}/combined/default-signed.pem
 {% endif %}
@@ -152,15 +152,24 @@ frontend  HTTPS-IN
         {#acl network_allowed           src                  10.0.2.0/16 192.168.0.0/16 172.16.0.0/16 #}
         ## Host ACL Definitions
         acl host_direct_ip            path_reg             -i ^.*\b(\d{1,3}\.){3}\d{1,3}\b.*$
-        acl host_demo                 hdr(host)            -i {{ settings.hostname }}.{{ settings.domain }}
+{% if domino_nomadweb_use_proxy_url is defined %}
+{% if domino_nomadweb_use_proxy_url and domino_nomadweb_proxy_url is defined %}
+        acl host_main                 hdr(host)            -i {{ settings.hostname }}.{{ settings.domain }}
+{% endif %}
+{% endif %}
         acl host_console              hdr(host)            -i console.{{ settings.hostname }}.{{ settings.domain }}
         acl is_options                method               OPTIONS
 
 {% if domino_vagrant_rest_api_proxy_url is defined %}
         acl host_restapi              hdr(host)            -i {{ domino_vagrant_rest_api_proxy_url }}
 {% endif %}
-{% if domino_nomadweb_proxy_url is defined %}
-        acl host_nomadweb             hdr(host)            -i {{  domino_nomadweb_proxy_url }}
+{% if domino_nomadweb_use_proxy_url is defined %}
+{% if domino_nomadweb_use_proxy_url and domino_nomadweb_proxy_url is defined %}
+        acl host_nomadweb             hdr(host)            -i {{ domino_nomadweb_proxy_url }}
+{% endif %}
+{% if not domino_nomadweb_use_proxy_url %}
+        acl host_nomadweb             hdr(host)            -i {{ settings.hostname }}.{{ settings.domain }}
+{% endif %}
 {% endif %}
 {% if domino_install_proxy_url is defined %}
         acl host_domino               hdr(host)            -i {{ domino_install_proxy_url }}
@@ -195,10 +204,18 @@ frontend  HTTPS-IN
 {% endif %}
 {% if domino_nomadweb_proxy_url is defined %}
         use_backend                   cors_backend         if host_nomadweb is_options
-        use_backend                   nomadweb             if host_nomadweb        
+        use_backend                   nomadweb             if host_nomadweb
 {% endif %}
 {% if domino_install_proxy_url is defined %}
-        use_backend                   domino               if host_domino || host_demo 
+{% if domino_nomadweb_use_proxy_url is defined %}
+{% if domino_nomadweb_use_proxy_url and domino_nomadweb_proxy_url is defined %}
+        use_backend                   domino               if host_domino || host_main
+{% elif not domino_nomadweb_use_proxy_url %}
+        use_backend                   domino               if host_domino
+{% else %}
+        use_backend                   domino               if host_domino
+{% endif %}
+{% endif %}
 {% endif %}
 {% if domino_leap_proxy_url is defined %}
         use_backend                   leap                 if host_leap
@@ -319,7 +336,7 @@ backend sametime
 # Voltmx
 backend voltmx
         balance roundrobin
-        http-request set-header X-Forwarded-Port %[dst_port]  
+        http-request set-header X-Forwarded-Port %[dst_port]
         http-request add-header X-Forwarded-Proto https
 {% if voltmx_port_forwards[1].guest is defined %}
         server  voltmx-https          127.0.0.1:{{ voltmx_port_forwards[1].guest }}    ssl verify none check cookie app1 init-addr last,libc,none

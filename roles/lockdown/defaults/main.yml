@@ -5,8 +5,6 @@ lockdown_use_settings_password: false
 lockdown_new_password: "STARTcloud24@!"
 lockdown:
   - exim4
-  #  - cockpit.socket
-  #  - cockpit.service
   - portmap
   - rpcbind.target
   - rpcbind.service
