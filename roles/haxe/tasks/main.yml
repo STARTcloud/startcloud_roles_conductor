@@ -35,6 +35,42 @@
     update_cache: true
 
 -
+  name: "Checking if haxelib directory exists"
+  ansible.builtin.stat:
+    path: "{{ haxelib }}"
+  register: haxelib_dir_check
+
+-
+  name: "Cleaning destination directory"
+  ansible.builtin.file:
+    path: "/tmp/haxe_temp"
+    state: directory
+    recurse: yes
+    force: yes
+
+-
+  name: "Cleaning destination directory"
+  ansible.builtin.shell: "{{ item }}"
+  with_items:
+    - "rm -rf /tmp/haxe_temp"
+
+-
+  name: "Ensuring /opt/haxelib exists"
+  ansible.builtin.file:
+    path: "{{ haxelib_files }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ service_user | default(ansible_user_id) }}"
+    group: "{{ service_group | default(ansible_user_id) }}"
+  loop:
+    - "/opt/haxe"
+    - "{{ haxe_home }}"
+    - "{{ haxelib_dir }}"
+    - /tmp/haxe_temp
+  loop_control:
+    loop_var: haxelib_files
+
+-
   name: "Extracting Haxe tarball to temporary directory"
   ansible.builtin.unarchive:
     src: "/tmp/haxe-{{ local_haxe_version }}-linux64.tar.gz"
@@ -42,16 +78,37 @@
     remote_src: true
 
 -
+  name: "Cleaning destination directory"
+  ansible.builtin.file:
+    path: "/opt/haxe/haxe-{{ haxe_version }}"
+    state: directory
+    recurse: yes
+    force: yes
+
+-
+  name: "Cleaning destination directory"
+  ansible.builtin.shell: "{{ item }}"
+  with_items:
+    - "rm -rf /opt/haxe/haxe-{{ haxe_version }}/"
+
+-
+  name: "Ensuring /opt/haxelib exists"
+  ansible.builtin.file:
+    path: "{{ haxelib_files }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ service_user | default(ansible_user_id) }}"
+    group: "{{ service_group | default(ansible_user_id) }}"
+  loop:
+    - "/opt/haxe/haxe-{{ haxe_version }}/"
+  loop_control:
+    loop_var: haxelib_files
+
+-
   name: "Synchronizing extracted Haxe files to the target directory"
   ansible.builtin.shell: "{{ item }}"
   with_items:
     - "mv /tmp/haxe_temp/haxe_*/* /opt/haxe/haxe-{{ haxe_version }}/"
-
--
-  name: "Checking if haxelib directory exists"
-  ansible.builtin.stat:
-    path: "{{ haxelib }}"
-  register: haxelib_dir_check
 
 -
   name: "Debug haxelib directory existence"
