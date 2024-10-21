@@ -14,7 +14,7 @@
   ansible.builtin.user:
     name: "startcloud"
     state: present
-    password: "{{ settings.vagrant_user_pass | password_hash('sha512') }}"
+    password: "{{ vagrant_user_pass | password_hash('sha512') }}"
 
 -
   name: "Changing startcloud Password"
