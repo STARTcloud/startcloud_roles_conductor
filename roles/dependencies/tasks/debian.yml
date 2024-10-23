@@ -4,6 +4,14 @@
   ansible.builtin.include_vars: "{{ ansible_os_family | lower }}.yml"
 
 -
+  name: "Create APT proxy configuration: 10proxy.conf"
+  ansible.builtin.template:
+    src: 10proxy.conf.j2
+    dest: /etc/apt/apt.conf.d/10proxy.conf
+    mode: '0644'
+  when: use_proxy | bool
+
+-
   name: "Gathering DEB architecture"
   ansible.builtin.command: dpkg --print-architecture
   register: deb_architecture
