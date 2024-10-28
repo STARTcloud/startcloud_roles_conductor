@@ -143,12 +143,45 @@
   ansible.builtin.dnf:
     autoremove: true
 
-# Skipping Netplan config removal (not applicable to Red Hat)
+-
+  name: "Register Stale Netplan Configs"
+  ansible.builtin.find:
+    paths: /etc/netplan
+    patterns: "*.yaml"
+  register: files_to_delete
+
+-
+  name: "Remove old YAML configs"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ files_to_delete.files }}"
+
+-
+  name: "Add enp0s6 for DHCP for BHYVE Zones"
+  ansible.builtin.template:
+    dest: /etc/netplan/50-cloud-init.yaml
+    mode: a+x
+    src: dhcp-all.redhat.yaml.j2
 
 -
   name: "Purging and autoremoving packages"
   ansible.builtin.dnf:
     autoremove: true
+
+-
+  name: "Enabling systemd-networkd"
+  ansible.builtin.service:
+    name: "systemd-networkd"
+    state: stopped
+    enabled: true
+
+-
+  name: "Disabling NetworkManager"
+  ansible.builtin.service:
+    name: "NetworkManager"
+    state: stopped
+    enabled: false
 
 -
   name: "Removing Final Caches and Logs"

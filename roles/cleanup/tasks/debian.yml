@@ -231,7 +231,7 @@
   ansible.builtin.template:
     dest: /etc/netplan/50-cloud-init.yaml
     mode: a+x
-    src: dhcp-all.yaml.j2
+    src: dhcp-all.debian.yaml.j2
 
 -
   name: "Purge and Autoremove"
