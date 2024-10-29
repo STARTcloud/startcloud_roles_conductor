@@ -73,9 +73,9 @@
     state: restarted
   tags: haproxy
 
--
-  name: "Restart supervisord to apply configuration"
-  when: ansible_module_running_in_container
-  ansible.builtin.service:
-    name: supervisor
-    state: restarted
+#-
+#  name: "Restart supervisord to apply configuration"
+#  when: ansible_module_running_in_container
+#  ansible.builtin.service:
+#    name: supervisor
+#    state: restarted
