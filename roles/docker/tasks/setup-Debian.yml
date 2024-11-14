@@ -60,6 +60,8 @@
   when: docker_add_repo | bool
 
 -
-  name: "Installing Python3 Docker Module"
-  ansible.builtin.pip:
-    name: "docker" 
+  name: "Ensuring dependencies are installed"
+  ansible.builtin.apt:
+    name:
+      - python3-docker
+    state: present
