@@ -13,7 +13,7 @@
       name: "Executing shell command to sort network interfaces"
       when: networks[0] is defined
       changed_when: false
-      ansible.builtin.shell: "ls /sys/class/net | grep -v ^lo$"
+      ansible.builtin.shell: "ls /sys/class/net | grep -v ^lo$ | grep -v docker"
       args:
         executable: /bin/bash
       register: sorted_interfaces_output
