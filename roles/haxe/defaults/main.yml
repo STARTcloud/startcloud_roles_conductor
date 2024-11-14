@@ -19,10 +19,14 @@ haxelib: "{{ haxe_home }}/haxelib"
 # Whether to install Neko (required for Haxe)
 install_neko: true
 
+# Whether to install OpenFL
+install_openfl: true
+
 # Example usage:
 additional_haxe_libraries:
   - feathersui-validators
   - lime
+  - pako
 
 # Example usage:
 additional_haxe_libraries_dev:
