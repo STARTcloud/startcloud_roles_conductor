@@ -60,10 +60,10 @@ docker_daemon_options: {
   "log-driver": "journald",
   "log-level": "warn",
   "debug": false,
-  "dns": ["{{ dns1 }}", "{{ dns2 }}"],
+#  "dns": ["{{ dns1 }}", "{{ dns2 }}"],
   "default-address-pools":
   [
-    {"base":"10.2.0.0/16","size":24}
+    {"base":"172.17.0.0/24","size":28}
   ]
 }
 
