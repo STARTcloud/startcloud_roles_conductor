@@ -115,14 +115,14 @@
   ansible.builtin.include_tasks: docker-users.yml
   when: at_least_one_user_to_modify is defined
 
--
-  name: "Setting Docker Daemon"
-  ansible.builtin.template:
-    src: "docker-daemon.json.j2"
-    dest: "/etc/docker/daemon.json"
-    owner: "root"
-    group: "root"
-    mode: "0644"
+#-
+#  name: "Setting Docker Daemon"
+#  ansible.builtin.template:
+#    src: "docker-daemon.json.j2"
+#    dest: "/etc/docker/daemon.json"
+#    owner: "root"
+#    group: "root"
+#    mode: "0644"
 
 #-
 #  name: "Setting Docker SSL/TLS Service Options"
