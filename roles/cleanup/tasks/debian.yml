@@ -251,3 +251,16 @@
     - "sudo rm -rf /var/snap"
     - "sudo rm -rf /etc/cloud"
     - "sudo rm -rf /var/lib/cloud"
+
+-
+  name: "Remove old directories and files"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/snap"
+    - "/root/snap"
+    - "/var/snap"
+    - "/etc/cloud"
+    - "/var/lib/cloud"
+
