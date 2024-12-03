@@ -72,7 +72,7 @@
         path: /etc/yum.conf
         section: main
         option: proxy
-        value: http://proxy:3128
+        value: "http://{{ proxy_server }}:{{ proxy_port }}"
       when: ansible_os_family == "RedHat"
 
 - hosts: mongo
