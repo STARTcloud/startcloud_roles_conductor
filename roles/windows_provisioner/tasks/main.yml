@@ -997,7 +997,7 @@
 - name: "Verifying Health of Windows Installation"
   when: verify
   block:
-    - name: "Scaning health of the image"
+    - name: "Scanning health of the image"
       ansible.windows.win_shell: 'DISM /Online /Cleanup-Image /ScanHealth'
 
     - name: "Starting component cleanup"
