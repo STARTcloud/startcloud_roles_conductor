@@ -355,21 +355,33 @@
       register: haproxy_status
       ignore_errors: true
 
-    - name: "Setting LE entries as a fact to consume"
+    -
+      name: "Setting LE entries as a fact to consume"
       ansible.builtin.set_fact:
-        le_entries: "{{ (dns_entries_list | default([])) + ['-d ' + item] }}"
-      loop:
-        - "{{ settings.hostname }}.{{ settings.domain }}"
+        le_entries: "{{ ['-d ' + settings.hostname + '.' + settings.domain] }}"
+
+    -
+      name: "Add subdomain entries to LE entries"
+      ansible.builtin.set_fact:
+        le_entries: "{{ le_entries + ['-d ' + item + '.' + settings.hostname + '.' + settings.domain] }}"
+      loop: "{{ dns_entries_list }}"
 
     -
       name: "Checking if certificate exists"
       register: letsencrypt_cert
       ansible.builtin.stat:
-        path: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
+        path: "/etc/letsencrypt/live/{{ settings.hostname | lower }}.{{ settings.domain | lower }}/cert.pem"
 
     -
       name: "Generating new staging certificate request"
-      ansible.builtin.shell: certbot certonly --standalone --noninteractive --agree-tos --key-type rsa --staging --email {{ settings.email }} {{ le_entries | join(' ') }}
+      ansible.builtin.shell: >-
+        certbot certonly --standalone
+        --noninteractive
+        --agree-tos
+        --key-type rsa
+        --staging
+        --email {{ settings.email }}
+        {{ le_entries | join(' ') }}
       when: haproxy_status.rc != 0 and not letsencrypt_cert.stat.exists and letsencrypt_staging_enabled
 
     -
@@ -397,16 +409,17 @@
         - "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}.crt"
 
     -
-      name: "Checking if certificate exists"
+      name: "Checking if letsencrypt certificate exists"
       register: letsencrypt_cert_generated_check
+      become: true
       ansible.builtin.stat:
-        path: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
+        path: "/etc/letsencrypt/live/{{ settings.hostname | lower }}.{{ settings.domain | lower }}/cert.pem"
 
     -
-      name: "Copying cert.pem from Let'sEncrypt"
-      when: letsencrypt_cert_generated_check.stat.exists
+      name: "Copying cert.pem from Let'sEncrypt "
+      when: letsencrypt_cert_generated_check.stat.exists | bool
       ansible.builtin.copy:
-        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/cert.pem"
+        src: "/etc/letsencrypt/live/{{ settings.hostname | lower }}.{{ settings.domain | lower }}/cert.pem"
         dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
         owner: "{{ service_user }}"
         group: "{{ service_group }}"
@@ -415,7 +428,7 @@
 
     -
       name: "Copying CRT"
-      when: letsencrypt_cert_generated_check.stat.exists
+      when: letsencrypt_cert_generated_check.stat.exists | bool
       ansible.builtin.copy:
         src: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.crt"
         dest: "{{ cert_dir }}/crt/{{ settings.hostname }}.{{ settings.domain }}.crt"
@@ -426,9 +439,9 @@
 
     -
       name: "Copying privkey.pem from Let'sEncrypt"
-      when: letsencrypt_cert_generated_check.stat.exists
+      when: letsencrypt_cert_generated_check.stat.exists | bool
       ansible.builtin.copy:
-        src: "/etc/letsencrypt/live/{{ settings.hostname }}.{{ settings.domain }}/privkey.pem"
+        src: "/etc/letsencrypt/live/{{ settings.hostname | lower }}.{{ settings.domain | lower }}/privkey.pem"
         dest: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
         owner: "{{ service_user }}"
         group: "{{ service_group }}"
@@ -437,6 +450,7 @@
 
     -
       name: "Copying privkey.pem"
+      when: letsencrypt_cert_generated_check.stat.exists | bool
       become: true
       ansible.builtin.copy:
         src: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-letsencrypt.key"
