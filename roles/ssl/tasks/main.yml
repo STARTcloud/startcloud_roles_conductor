@@ -146,7 +146,7 @@
               name: "Creating private key for Certifcate Authority"
               community.crypto.openssl_privatekey:
                 path: "{{ cert_dir }}/ca/ca-certificate.key"
-                passphrase: "{{ cert_pass }}"
+                passphrase: "{{ ca_cert_pass }}"
                 cipher: 'auto'
                 mode: '0777'
     
@@ -173,7 +173,7 @@
                 path: "{{ cert_dir }}/ca/ca-certificate.crt"
                 csr_content: "{{ ca_csr.csr }}"
                 privatekey_path: "{{ cert_dir }}/ca/ca-certificate.key"
-                privatekey_passphrase: "{{ cert_pass }}"
+                privatekey_passphrase: "{{ ca_cert_pass }}"
                 provider: selfsigned
                 owner: "{{ service_user }}"
                 mode: '0777'
@@ -209,34 +209,19 @@
             group: "{{ service_group }}"
             mode: '0644'
             remote_src: yes
-    
+
         -
-          name: "Setting DNS entries as a fact"
+          name: "Setting DNS Subdomain entries as a fact"
           ansible.builtin.set_fact:
-            dns_entries_list: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
-          loop:
-            - nomadweb
-            - domino
-            - traveler
-            - verse
-            - console
-            - logging
-            - welcome
-            - proxy
-            - downloads
-            - sametime
-            - leap
-            - restapi
-            - guacamole
-            - voltmx
-            - www
-    
+            dns_entries: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
+          loop: "{{ dns_entries_list }}"
+
         -
           name: "Generating an OpenSSL CSR with subjectAltName extension with dynamic list"
           community.crypto.openssl_csr:
             path: "{{ cert_dir }}/csr/{{ settings.hostname }}.{{ settings.domain }}-self-signed.csr"
             privatekey_path: "{{ cert_dir }}/key/{{ settings.hostname }}.{{ settings.domain }}-self-signed.key"
-            subject_alt_name: "{{ dns_entries_list | list }}"
+            subject_alt_name: "{{ dns_entries | list }}"
             country_name: "{{ countrycode }}"
             organization_name: "{{ domino_organization }}"
             common_name: "{{ settings.hostname }}.{{ settings.domain }}"
