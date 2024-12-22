@@ -211,6 +211,11 @@
             remote_src: yes
 
         -
+          name: "Setting DNS entries as a fact to consume for SSL generation"
+          ansible.builtin.set_fact:
+            dns_entries: "{{ ['DNS:' + settings.hostname + '.' + settings.domain] }}"
+
+        -
           name: "Setting DNS Subdomain entries as a fact"
           ansible.builtin.set_fact:
             dns_entries: "{{ dns_entries | default([]) + ['DNS:' + item + '.' + settings.hostname + '.' + settings.domain] }}"
