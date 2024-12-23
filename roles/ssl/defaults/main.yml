@@ -5,7 +5,7 @@ selfsigned_enabled: false
 generate_self_signed_certificate_authority: false
 letsencrypt_enabled: false
 cert_pass: ThisNeedstoBeSecure!
-ca_cert_pass: STARTSecure2025@!
+ca_cert_pass: STARTSecure25@!
 countrycode: US
 domino_organization: DEMO
 
