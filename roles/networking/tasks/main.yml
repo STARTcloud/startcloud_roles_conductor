@@ -345,7 +345,7 @@
           name: "Writing adapter details to YAML file"
           ansible.builtin.copy:
             content: "{{ adapters_yaml }}"
-            dest: "/vagrant/support-bundle/adapters.yml"
+            dest: "/vagrant/support-bundle/provisioned-adapters.yml"
             force: false
             mode: '0644'
     
