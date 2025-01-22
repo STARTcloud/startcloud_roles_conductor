@@ -140,6 +140,19 @@
       block:
         -
           name: "Generating Certificate Authority"
+          when: not generate_self_signed_certificate_authority
+          block:
+            -
+              name: "Copying root CA certificate to trusted certificates directory"
+              ansible.builtin.copy:
+                src: "ssls/ca/ca-certificate.key"
+                dest: "{{ cert_dir }}/ca/ca-certificate.key"
+                owner: root
+                group: root
+                mode: '0644'
+
+        -
+          name: "Generating Certificate Authority"
           when: generate_self_signed_certificate_authority
           block:
             -
