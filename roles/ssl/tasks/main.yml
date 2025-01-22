@@ -151,6 +151,15 @@
                 group: root
                 mode: '0644'
 
+            -
+              name: "Copying root CA certificate to trusted certificates directory"
+              ansible.builtin.copy:
+                src: "ssls/ca/ca-certificate.crt"
+                dest: "{{ cert_dir }}/ca/ca-certificate.crt"
+                owner: root
+                group: root
+                mode: '0644'
+
         -
           name: "Generating Certificate Authority"
           when: generate_self_signed_certificate_authority
