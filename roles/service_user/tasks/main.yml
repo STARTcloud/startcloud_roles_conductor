@@ -8,7 +8,7 @@
       ansible.builtin.group:
         name: "{{ service_group }}"
         state: present
-    
+
     -
       name: "Adding user to groups: {{ service_user }}"
       ansible.builtin.user:
@@ -16,7 +16,14 @@
         shell: /bin/bash
         groups: "{{ service_group }},sudo"
         home: "{{ service_home_dir }}"
-    
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.service_user.a.msg }}"
+          - "{{ progress_checks.service_user.a.val }}"
+
     -
       name: "Adding user to sudoers: {{ service_user }}"
       ansible.builtin.lineinfile:
@@ -24,7 +31,7 @@
         line: "{{ service_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
         mode: '0644'
         create: true
-    
+
     -
       name: "Adding soft nofile limits to in limits.conf for user: {{ service_user }}"
       community.general.pam_limits:
@@ -32,7 +39,14 @@
         limit_type: soft
         limit_item: nofile
         value: "{{ service_user_soft_limit }}"
-    
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.service_user.b.msg }}"
+          - "{{ progress_checks.service_user.b.val }}"
+
     -
       name: "Adding hard nofile limits to in limits.conf for user: {{ service_user }} "
       community.general.pam_limits:
@@ -40,7 +54,7 @@
         limit_type: hard
         limit_item: nofile
         value: "{{ service_user_hard_limit }}"
-    
+
     -
       name: "Creating Installation Directories"
       ansible.builtin.file:
@@ -50,3 +64,10 @@
         mode: '0755'
       with_items:
         - "{{ service_home_dir }}/.ansible/tmp"
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.service_user.c.msg }}"
+          - "{{ progress_checks.service_user.c.val }}"

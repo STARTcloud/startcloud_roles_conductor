@@ -4,6 +4,12 @@
   when: run_tasks
   block:
     -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.ssl.a.msg }}"
+          - "{{ progress_checks.ssl.a.val }}"
+    -
       name: "Create Directories for SSLs"
       ansible.builtin.file:
         path: "{{ item }}"
@@ -133,6 +139,13 @@
             group: "{{ service_group }}"
             mode: '0644'
             remote_src: true
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.ssl.b.msg }}"
+          - "{{ progress_checks.ssl.b.val }}"
 
     -
       name: "Generating Self Signed Certificate"
@@ -549,3 +562,10 @@
             group: "{{ service_group }}"
             mode: '0777'
             remote_src: true
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.ssl.c.msg }}"
+          - "{{ progress_checks.ssl.c.val }}"

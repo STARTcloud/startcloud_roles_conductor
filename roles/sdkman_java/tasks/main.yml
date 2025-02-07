@@ -4,18 +4,24 @@
   when: run_tasks
   block:
   ## Do not quote the shell command below without reworking the command
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.sdkman_java.a.msg }}"
+          - "{{ progress_checks.sdkman_java.a.val }}"
 
     -
       name: "Set SDKMAN user/group vars"
       ansible.builtin.set_fact:
         sdk_service_user: '{{ service_user }}'
         sdk_service_group: '{{ service_group }}'
-    
+
     -
       name: "Setting SDKMAN_DIR environment variable"
       ansible.builtin.set_fact:
         sdkman_dir: '{{ service_home_dir }}/.sdkman'
-    
+
     -
       name: "Extracting Java SDK version from SDKMAN: {{ java_version }}"
       ansible.builtin.shell: |
@@ -29,7 +35,7 @@
       register: computed_java_version
       changed_when: false
       when: "java_version  == 'LATEST'"
-    
+
     -
       name: "Setting Java SDK version from SDKMAN: {{ java_version }}"
       ansible.builtin.shell: "echo {{ java_version }}"
@@ -39,7 +45,14 @@
         executable: "/bin/bash"
       register: selected_java_version
       when: "java_version != 'LATEST'"
-    
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.sdkman_java.b.msg }}"
+          - "{{ progress_checks.sdkman_java.b.val }}"
+
     -
       name: "Installing Java via SDKMAN: {{ java_version }}"
       become_user: "{{ sdk_service_user }}"
@@ -52,7 +65,7 @@
       failed_when: >-
         sdk_install.rc != 0 and
         'is already installed.' not in sdk_install.stdout
-    
+
     -
       name: "Adding Java to /etc/profile.d/java.sh for {{ service_user }}"
       ansible.builtin.lineinfile:
@@ -64,7 +77,14 @@
         line: 'PATH=$PATH:{{ service_home_dir }}/.sdkman/candidates/java/current/bin'
       with_items:
         - { user: "{{ service_user }}", dir: "/etc/profile.d/java.sh" }
-    
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.sdkman_java.c.msg }}"
+          - "{{ progress_checks.sdkman_java.c.val }}"
+
     -
       name: "Updating Java Alternatives"
       community.general.alternatives:

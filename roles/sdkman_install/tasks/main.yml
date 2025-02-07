@@ -4,16 +4,22 @@
   when: run_tasks
   block:
     -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.sdkman_install.a.msg }}"
+          - "{{ progress_checks.sdkman_install.a.val }}"
+    -
       name: "Set SDKMAN user/group vars"
       ansible.builtin.set_fact:
         sdk_service_user: '{{ service_user }}'
         sdk_service_group: '{{ service_group }}'
-    
+
     -
       name: "Setting SDKMAN_DIR environment variable"
       ansible.builtin.set_fact:
         sdkman_dir: '{{ service_home_dir }}/.sdkman'
-    
+
     -
       name: "Preparing System for SDKMAN"
       become: true
@@ -28,7 +34,7 @@
                 - '{{ ansible_os_family }}.yml'
               paths:
                 - vars
-    
+
         -
           name: "Installing system packages"
           ansible.builtin.package:
@@ -38,7 +44,7 @@
           become: true
           tags:
             - sdkman_privilege
-    
+
         -
           name: "Creating Ansible Temp Directory"
           become: true
@@ -50,13 +56,13 @@
             group: '{{ sdk_service_group }}'
           with_items:
             - "{{ service_home_dir }}/.ansible/tmp"
-    
+
         -
           name: "Checking for SDKMAN installation"
           ansible.builtin.stat:
             path: '{{ sdkman_dir }}/bin/sdkman-init.sh'
           register: sdkman_init
-    
+
     -
       name: "Installing SDKMAN"
       when: not sdkman_init.stat.exists
@@ -66,12 +72,12 @@
           name: "Check service user and group"
           ansible.builtin.command: id {{ sdk_service_user }}
           register: sdk_service_user_info
-    
+
         -
           name: "Debugging User"
           debug:
             var: sdk_service_user_info
-    
+
         -
           name: "Downloading SDKMAN"
           become: true
@@ -82,7 +88,7 @@
             owner: '{{ sdk_service_user }}'
             group: '{{ sdk_service_group }}'
             validate_certs: '{{ sdkman_validate_ssl }}'
-    
+
         -
           name: "Running SDKMAN Install script"
           environment:
@@ -92,7 +98,7 @@
           args:
             creates: '{{ sdkman_dir }}/bin/sdkman-init.sh'
           notify: Cleanup SDKMAN script
-    
+
         -
           name: "Fixing permissions on SDKMAN_DIR"
           ansible.builtin.file:
@@ -104,7 +110,13 @@
           become: true
           tags:
             - sdkman_privilege
-    
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.sdkman_install.b.msg }}"
+          - "{{ progress_checks.sdkman_install.b.val }}"
+
     -
       name: "Configuring SDKMAN"
       block:
@@ -116,7 +128,7 @@
             owner: '{{ sdk_service_user }}'
             group: '{{ sdk_service_group }}'
             mode: '0755'
-    
+
         -
           name: Flush SDK caches (before)
           become_user: '{{ sdk_service_user }}'
@@ -126,7 +138,7 @@
             executable: /bin/bash
           loop: '{{ sdkman_flush_caches_before }}'
           changed_when: false
-    
+
         -
           name: Update SDKMAN
           become_user: '{{ sdk_service_user }}'
@@ -137,7 +149,7 @@
           register: sdk_selfupdate
           changed_when: sdk_selfupdate.stdout != 'No update available at this time.'
           when: sdkman_update
-    
+
         -
           name: Install SDK candidates/versions
           become_user: '{{ sdk_service_user }}'
@@ -153,7 +165,7 @@
           failed_when: >-
             sdk_install.rc != 0 and
             'is already installed.' not in sdk_install.stdout
-    
+
         -
           name: Uninstall SDK candidates/versions
           become_user: '{{ sdk_service_user }}'
@@ -167,7 +179,7 @@
           changed_when: >-
             not item.candidate + ' ' + item.version + ' is not installed.'
             in sdk_uninstall.stdout
-    
+
         -
           name: "Persisting additional SDKMAN environment variables"
           ansible.builtin.include_tasks: persist_env.yml
@@ -178,7 +190,7 @@
             - .zshrc
           loop_control:
             loop_var: sdkman_profile
-    
+
     -
       name: "Updating alternatives"
       community.general.alternatives:
@@ -190,3 +202,9 @@
       when: ansible_os_family != 'Darwin'
       tags:
         - sdkman_privilege
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.sdkman_install.c.msg }}"
+          - "{{ progress_checks.sdkman_install.c.val }}"

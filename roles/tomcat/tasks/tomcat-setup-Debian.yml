@@ -1,5 +1,11 @@
 ---
 -
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.tomcat.a.msg }}"
+      - "{{ progress_checks.tomcat.a.val }}"
+-
   name: "Creating Tomcat directories"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -10,7 +16,7 @@
     - "/etc/tomcat{{ tomcat_version }}/webapps/manager/META-INF"
 
 # These have been moved to the startcloud_ssl role, so that users can import their own keys
-#- 
+#-
 #  name: "Creating a keystore for the self-signed certificate/private key pair"
 #  when: selfsigned_enabled
 #  become_user: "{{ service_user }}"
@@ -74,6 +80,13 @@
       name: "Updating apt cache"
       ansible.builtin.apt:
         update_cache: yes
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.tomcat.b.msg }}"
+      - "{{ progress_checks.tomcat.b.val }}"
 
 -
   name: "Installing Tomcat {{ tomcat_version }}"
@@ -150,6 +163,13 @@
   with_items:
     - "/etc/tomcat{{ tomcat_version }}/server.xml"
   notify: "Restart tomcat"
+
+-
+  name: "Log playbook progress"
+  ansible.builtin.debug:
+    msg:
+      - "{{ progress_checks.tomcat.c.msg }}"
+      - "{{ progress_checks.tomcat.c.val }}"
 
 -
   name: "Starting and Enabling Tomcat {{ tomcat_version }}"

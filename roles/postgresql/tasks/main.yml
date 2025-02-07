@@ -3,48 +3,67 @@
   when: run_tasks
   block:
     -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.postgresql.a.msg }}"
+          - "{{ progress_checks.postgresql.a.val }}"
+    -
       name: "Including  Variable configuration"
       ansible.builtin.include_tasks: variables.yml
-    
+
     -
       name: "Including setup-Archlinux.yml"
       ansible.builtin.include_tasks: setup-Archlinux.yml
       when: ansible_os_family == 'ArchLinux'
-    
+
     -
       name: "Including setup-Debian.yml"
       ansible.builtin.include_tasks: setup-Debian.yml
       when: ansible_os_family == 'Debian'
-    
+
     -
       name: "Including setup-RedHat.yml"
       ansible.builtin.include_tasks: setup-RedHat.yml
       when: ansible_os_family == 'RedHat'
-    
+
     -
       name: "Including initialize.yml"
       ansible.builtin.include_tasks: initialize.yml
-    
+
     -
       name: "Including configure.yml"
       ansible.builtin.include_tasks: configure.yml
-    
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.postgresql.b.msg }}"
+          - "{{ progress_checks.postgresql.b.val }}"
+
     -
       name: Ensure PostgreSQL is started and enabled on boot.
       ansible.builtin.service:
         name: "{{ postgresql_daemon }}"
         state: "{{ postgresql_service_state }}"
         enabled: "{{ postgresql_service_enabled }}"
-    
+
     -
       name: "Configuring Postgres Users"
       ansible.builtin.import_tasks: users.yml
-    
+
     -
       name: "Configuring Postgres Datbases"
       ansible.builtin.import_tasks: databases.yml
-    
+
+    -
+      name: "Log playbook progress"
+      ansible.builtin.debug:
+        msg:
+          - "{{ progress_checks.postgresql.c.msg }}"
+          - "{{ progress_checks.postgresql.c.val }}"
+
     -
       name: "Configuring Postgres User properties"
       ansible.builtin.import_tasks: users_props.yml
-    

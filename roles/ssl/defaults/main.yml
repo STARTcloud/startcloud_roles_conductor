@@ -33,3 +33,9 @@ dns_entries_list:
     - guacamole
     - voltmx
     - www
+
+progress_checks:
+  ssl:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }

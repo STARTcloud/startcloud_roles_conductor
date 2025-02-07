@@ -71,3 +71,9 @@ postgresql_users: []
 
 # Whether to output user data when managing users.
 postgres_users_no_log: true
+
+progress_checks:
+  postgresql:
+    a: { msg: '', val: 10 }
+    b: { msg: '', val: 50 }
+    c: { msg: '', val: 100 }
